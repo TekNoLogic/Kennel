@@ -1,0 +1,12 @@
+## Interface: 20000
+
+## Title: Kennel
+## Author: Tekkub Stoutwrithe
+## Notes: Swap a random minipet every time you visit the bank
+## X-Category: Inventory
+
+## OptionalDeps: Dongle
+
+Dongle.lua
+PeriodicTableMicro.lua
+Kennel.lua
