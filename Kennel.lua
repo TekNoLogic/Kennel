@@ -78,10 +78,8 @@ function Kennel:DoSwaps(set)
 	local l, g = pets[set].player, pets[set].bank
 	if l.num == 0 then return end
 	for i=1,l.num do
-		self:Print(g.num+1-i)
 		local r = math.random(g.num + 1 - i)
 
-		self:Print(string.join(", ", "Swapping", l.bag[i], l.slot[i], g.bag[r], g.slot[r]))
 		PickupContainerItem(l.bag[i], l.slot[i])
 		PickupContainerItem(g.bag[r], g.slot[r])
 		table.remove(g.bag, r)
