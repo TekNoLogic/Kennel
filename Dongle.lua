@@ -12,7 +12,7 @@
         copyright notice, this list of conditions and the following
         disclaimer in the documentation and/or other materials provided
         with the distribution.
-      * Neither the name of the Dongle Development Team nor the names of 
+      * Neither the name of the Dongle Development Team nor the names of
         its contributors may be used to endorse or promote products derived
         from this software without specific prior written permission.
 
@@ -28,14 +28,15 @@
   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ---------------------------------------------------------------------------]]
+local major = "DongleStub"
+local minor = tonumber(string.match("$Revision: 173 $", "(%d+)") or 1)
 
-local major,minor = "DongleStub", 20061205.3
 local g = getfenv(0)
 
 if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 	local lib = setmetatable({}, {
 		__call = function(t,k) 
-			if type(t.versions == "table") and t.versions[k] then 
+			if type(t.versions) == "table" and t.versions[k] then 
 				return t.versions[k] 
 			else
 				error("Cannot find a library with name '"..tostring(k).."'", 2)
@@ -86,11 +87,11 @@ if not g.DongleStub or g.DongleStub:IsNewerVersion(major, minor) then
 end
 
 --[[-------------------------------------------------------------------------
-Begin Library Implementation
+  Begin Library Implementation
 ---------------------------------------------------------------------------]]
 
 local major = "Dongle"
-local minor = tonumber(select(3,string.find("$Revision: 92 $", "(%d+)")) or 1)
+local minor = tonumber(string.match("$Revision: 194 $", "(%d+)") or 1)
 
 assert(DongleStub, string.format("%s requires DongleStub.", major))
 if not DongleStub:IsNewerVersion(major, minor) then return end
@@ -100,6 +101,7 @@ local methods = {
 	"RegisterEvent", "UnregisterEvent", "UnregisterAllEvents", "TriggerEvent",
 	"EnableDebug", "Print", "PrintF", "Debug", "DebugF",
 	"InitializeDB",
+	"InitializeSlashCommand",
 	"NewModule", "HasModule", "IterateModules",
 }
 
@@ -110,6 +112,7 @@ local loadorder = {}
 local events = {}
 local databases = {}
 local commands = {}
+local frame
 
 local function assert(level,condition,message)
 	if not condition then
@@ -190,16 +193,24 @@ function Dongle:HasModule(module)
 	return reg.modules[module]
 end
 
-local EMPTY_TABLE = {}
+local NIL_FUNC = function() end
 
 function Dongle:IterateModules()
 	local reg = lookup[self]
 	assert(3, reg, "You must call 'IterateModules' from a registered Dongle.")
+	
+	if not reg.modules or not next(reg.modules) then return NIL_FUNC end
 
-	return ipairs(reg.modules or EMPTY_TABLE)
+	local i=1
+	return function()
+		local name = reg.modules[i]
+		if not name then return end
+		i = i + 1
+		return name, reg.modules[name]
+	end
 end
 
-function Dongle:ADDON_LOADED(frame, event, ...)
+function Dongle:ADDON_LOADED(event, ...)
 	for i=1, #loadqueue do
 		local obj = loadqueue[i]
 		table.insert(loadorder, obj)
@@ -231,7 +242,7 @@ function Dongle:TriggerEvent(event, ...)
 		for obj,func in pairs(eventTbl) do
 			if type(func) == "string" then
 				if type(obj[func]) == "function" then
-					safecall(obj[func], obj, event, ...)
+					safecall(obj[func], obj, event, ...) 
 				end
 			else
 				safecall(func,event,...)
@@ -372,7 +383,7 @@ do
 		assert(3, reg, "You must call 'Debug' from a registered Dongle.")
 		argcheck(level, 2, "number")
 
-		if reg.debugLevel and level >= reg.debugLevel then
+		if reg.debugLevel and level <= reg.debugLevel then
 			printHelp(self, "Debug", ...)
 		end
 	end
@@ -382,7 +393,7 @@ do
 		assert(3, reg, "You must call 'DebugF' from a registered Dongle.")
 		argcheck(level, 2, "number")
 
-		if reg.debugLevel and level >= reg.debugLevel then
+		if reg.debugLevel and level <= reg.debugLevel then
 			printFHelp(self, "DebugF", ...)
 		end
 	end
@@ -393,13 +404,7 @@ local dbMethods = {
 	"ResetProfile", "ResetDB",
 }
 
-function Dongle:InitializeDB(name, defaults, defaultProfile)
-	local reg = lookup[self]
-	assert(3, reg, "You must call 'InitializeDB' from a registered Dongle.")
-	argcheck(name, 2, "string")
-	argcheck(defaults, 3, "table", "nil")
-	argcheck(defaultProfile, 4, "string", "nil")
-
+local function initdb(parent, name, defaults, defaultProfile, olddb)
 	local sv = getglobal(name)
 
 	if not sv then
@@ -407,6 +412,7 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 		setglobal(name, sv)
 
 		-- Lets do the initial setup
+        
 		sv.char = {}
 		sv.faction = {}
 		sv.realm = {}
@@ -441,17 +447,21 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 	local profileKey = sv.profileKeys[char] or defaultProfile or char
 	sv.profileKeys[char] = profileKey
 
-	if not sv.profiles[profileKey] then sv.profiles[profileKey] = {} end
+	local profileCreated
+    if not sv.profiles[profileKey] then sv.profiles[profileKey] = {} profileCreated = true end
 
-	local db = {
-		["char"] = sv.char[char],
-		["realm"] = sv.realm[realm],
-		["class"] = sv.class[class],
-		["faction"] = sv.faction[faction],
-		["profile"] = sv.profiles[profileKey],
-		["global"] = sv.global,
-		["profiles"] = sv.profiles,
-	}
+	if olddb then
+		for k,v in pairs(olddb) do olddb[k] = nil end
+	end
+
+	local db = olddb or {}
+	db.char = sv.char[char]
+	db.realm = sv.realm[realm]
+	db.class = sv.class[class]
+	db.faction = sv.faction[faction]
+	db.profile = sv.profiles[profileKey]
+	db.global = sv.global
+	db.profiles = sv.profiles
 
 	-- Copy methods locally
 	for idx,method in pairs(dbMethods) do
@@ -462,7 +472,7 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 	db.sv = sv
 	db.sv_name = name
 	db.profileKey = profileKey
-	db.parent = reg.name
+	db.parent = parent
 	db.charKey = char
 	db.realmKey = realm
 	db.classKey = class
@@ -474,6 +484,21 @@ function Dongle:InitializeDB(name, defaults, defaultProfile)
 		db:RegisterDefaults(defaults)
 	end
 
+	return db,profileCreated
+end
+
+function Dongle:InitializeDB(name, defaults, defaultProfile)
+	local reg = lookup[self]
+	assert(3, reg, "You must call 'InitializeDB' from a registered Dongle.")
+	argcheck(name, 2, "string")
+	argcheck(defaults, 3, "table", "nil")
+	argcheck(defaultProfile, 4, "string", "nil")
+
+	local db,profileCreated = initdb(self, name, defaults, defaultProfile)
+
+	if profileCreated then
+		Dongle:TriggerEvent("DONGLE_PROFILE_CREATED", db, self, db.sv_name, db.profileKey)	
+	end
 	return db
 end
 
@@ -483,7 +508,7 @@ local function copyDefaults(dest, src, force)
 			if not dest[k] then dest[k] = {} end
 			copyDefaults(dest[k], v, force)
 		else
-			if not dest[k] or force then
+			if (dest[k] == nil) or force then
 				dest[k] = v
 			end
 		end
@@ -555,10 +580,12 @@ function Dongle.SetProfile(db, name)
 	local sv = db.sv
 	local old = sv.profiles[db.profileKey]
 	local new = sv.profiles[name]
-
+	local profileCreated
+	
 	if not new then
 		sv.profiles[name] = {}
 		new = sv.profiles[name]
+		profileCreated = true
 	end
 
 	if db.defaults and db.defaults.profile then
@@ -575,9 +602,11 @@ function Dongle.SetProfile(db, name)
 	sv.profileKeys[db.charKey] = name
     db.profileKey = name
 
-	-- FIRE: DONGLE_PROFILE_CHANGED, "DongleName", "SVName", "ProfileName"
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_CHANGED", db.parent, db.sv_name, name)
+	if profileCreated then
+		Dongle:TriggerEvent("DONGLE_PROFILE_CREATED", db, db.parent, db.sv_name, db.profileKey)	
+	end
+	
+	Dongle:TriggerEvent("DONGLE_PROFILE_CHANGED", db, db.parent, db.sv_name, db.profileKey)
 end
 
 function Dongle.GetProfiles(db, t)
@@ -602,8 +631,7 @@ function Dongle.DeleteProfile(db, name)
 	end
 
 	db.sv.profiles[name] = nil
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_DELETED", db.parent, db.sv_name, name)
+	Dongle:TriggerEvent("DONGLE_PROFILE_DELETED", db, db.parent, db.sv_name, name)
 end
 
 function Dongle.CopyProfile(db, name)
@@ -616,11 +644,8 @@ function Dongle.CopyProfile(db, name)
 	local profile = db.profile
 	local source = db.sv.profiles[name]
 
-	-- Don't do a destructive copy, just do what we're told
 	copyDefaults(profile, source, true)
-	-- FIRE: DONGLE_PROFILE_COPIED, "DongleName", "SVName", "SourceProfile", "DestProfile"
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_COPIED", db.parent, db.sv_name, name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_COPIED", db, db.parent, db.sv_name, name, db.profileKey)
 end
 
 function Dongle.ResetProfile(db)
@@ -634,9 +659,7 @@ function Dongle.ResetProfile(db)
 	if db.defaults and db.defaults.profile then
 		copyDefaults(profile, db.defaults.profile)
 	end
-	-- FIRE: DONGLE_PROFILE_RESET, "DongleName", "SVName", "ProfileName"
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_PROFILE_RESET", db.parent, db.sv_name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_RESET", db, db.parent, db.sv_name, db.profileKey)
 end
 
 
@@ -648,37 +671,93 @@ function Dongle.ResetDB(db, defaultProfile)
 	for k,v in pairs(sv) do
 		sv[k] = nil
 	end
+	
+	local parent = db.parent
 
-	local parent = lookup[db.parent].obj
-
-	local newdb = parent:InitializeDB(db.sv_name, db.defaults, defaultProfile)
-	newdb:SetProfile(newdb.profileKey)
-	local parent = lookup[db.parent].obj
-	parent:TriggerEvent("DONGLE_DATABASE_RESET", newdb.parent, newdb.sv_name, newdb.profileKey)
-
-	-- Remove the old database from the lookup table
-	databases[db] = nil
-	return newdb
+	initdb(parent, db.sv_name, db.defaults, defaultProfile, db)
+	Dongle:TriggerEvent("DONGLE_DATABASE_RESET", db, parent, db.sv_name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_CREATED", db, db.parent, db.sv_name, db.profileKey)
+	Dongle:TriggerEvent("DONGLE_PROFILE_CHANGED", db, db.parent, db.sv_name, db.profileKey)
+	return db
 end
 
-function Dongle:RegisterSlashCommand(command, prefix, pattern, validator)
-	local reg = lookup[self]
-	assert(3, reg, "You must call 'RegisterSlashCommand' from a registered Dongle.")
-	argcheck(prefix, 2, "string")
-	argcheck(pattern, 3, "string", "nil")
-	argcheck(validator, 4, "function", "nil")
+local slashCmdMethods = {
+	"RegisterSlashHandler",
+	"PrintUsage",
+}
 
-	if not reg.cmd then
-		reg.cmd = {}
+local function OnSlashCommand(cmd, cmd_line)
+	if cmd.patterns then
+		for pattern, tbl in pairs(cmd.patterns) do
+			if string.match(cmd_line, pattern) then
+				if type(tbl.handler) == "string" then
+					cmd.parent[tbl.handler](cmd.parent, string.match(cmd_line, pattern))
+				else
+					tbl.handler(cmd.parent, string.match(cmd_line, pattern))
+				end
+				return
+			end
+		end
 	end
-	reg.cmd[prefix] = {
-		["pattern"] = pattern,
-		["validator"] = validator,
+	cmd:PrintUsage()
+end
+
+function Dongle:InitializeSlashCommand(desc, name, ...)
+	local reg = lookup[self]
+	assert(3, reg, "You must call 'InitializeSlashCommand' from a registered Dongle.")
+	argcheck(desc, 2, "string")
+	argcheck(name, 3, "string")
+	argcheck(select(1, ...), 4, "string")
+	for i = 2,select("#", ...) do
+		argcheck(select(i, ...), i+2, "string")
+	end
+	
+	local cmd = {}
+	cmd.desc = desc
+	cmd.name = name
+	cmd.parent = self
+	cmd.slashes = { ... }
+	for idx,method in pairs(slashCmdMethods) do
+		cmd[method] = Dongle[method]
+	end
+	
+	local genv = getfenv(0)
+
+	for i = 1,select("#", ...) do
+		genv["SLASH_"..name..tostring(i)] = "/"..select(i, ...)
+	end
+
+	genv.SlashCmdList[name] = function(...) OnSlashCommand(cmd, ...) end
+	return cmd
+end
+
+function Dongle.RegisterSlashHandler(cmd, desc, pattern, handler)
+	argcheck(desc, 2, "string")
+	argcheck(pattern, 3, "string")
+	argcheck(handler, 4, "function", "string")
+
+	if not cmd.patterns then
+		cmd.patterns = {}
+	end
+	cmd.patterns[pattern] = {
+		["desc"] = desc,
+		["handler"] = handler,
 	}
+end
 
-	-- Register the slash command here
-
-
+function Dongle.PrintUsage(cmd)
+	local usage = cmd.desc.."\n".."/"..table.concat(cmd.slashes, ", /")..":\n"
+	if cmd.patterns then
+		local descs = {}
+		for pattern,tbl in pairs(cmd.patterns) do
+			table.insert(descs, tbl.desc)
+		end
+		table.sort(descs)
+		for _,desc in pairs(descs) do
+			usage = usage.." - "..desc.."\n"
+		end
+	end
+	cmd.parent:Print(usage)
 end
 
 --[[-------------------------------------------------------------------------
