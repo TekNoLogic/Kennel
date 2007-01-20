@@ -45,7 +45,6 @@ setmetatable(pt, {__call = function(self, item, set)
 	if not i or not rset then return end
 
 	local t = CacheSet(set) and cache[set]
-	Kennel:Print(i, t[i])
 	if t and t[i] then return t[i] end
 end})
 
