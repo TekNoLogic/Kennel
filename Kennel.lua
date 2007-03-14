@@ -12,7 +12,7 @@ local pets = {
 }
 
 
-Kennel = DongleStub("Dongle-Beta0"):New("Kennel")
+Kennel = DongleStub("Dongle-Beta1"):New("Kennel")
 
 
 function Kennel:Enable()
