@@ -3,8 +3,8 @@
 --      Are you local?      --
 ------------------------------
 
-local pt = KennelMicroPeriodicTable
-KennelMicroPeriodicTable = nil
+local pt = PeriodicTableMicro
+PeriodicTableMicro = nil
 local bankopen, swapped = false, false
 local pets = {
 	normal = {player = {bag = {}, slot = {}, num = 0}, bank = {bag = {}, slot = {}, num = 0}},

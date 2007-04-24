@@ -4,24 +4,26 @@
 ------------------------------
 
 local pt, cache, ids, sets = {}, {}, {}, {
-	["Minipet"] = "29953 29956 29957 29958 29901 29902 29903 29904 29363 29364 23083 18597 23007 23015 23002 18598 22235 21277 4401 8485 8486 8487 8488 8489 8490 8491 8492 8494 8495 8496 8497 8498 8499 8500 8501 10360 10361 10392 10393 10394 10398 10822 11023 11026 11110 11474 11825 11826 12264 12529 13582 13583 13584 15996 19450 20371 20769",
-	["Minipet - Holiday"]	= "21301 21305 21308 21309",
+	["Minipet"] = "23713,32588,13584,25535,13583,13582,19450,11023,10360,29958,29901,20371,29364,10361,23083,8491,8485,8486,8487,8490,8488,8489,11110,10393,10392,10822,20769,29953,8500,8501,18598,15996,11826,27445,29363,10398,4401,31760,18597,8496,8492,8494,8495,11825,23007,10394,8497,23015,29956,29902,29957,12529,11474,8499,8498,21277,11026,22235,23002,29904,11027,12264,29903",
+	["Minipet - Holiday"] = "21301,21305,21308,21309",
 }
 setmetatable(ids, {__mode = "k"})
-KennelMicroPeriodicTable = pt
+PeriodicTableMicro = pt
+
+
+local function TableStuffer(...)
+	local t = {}
+	for i=1,select("#", ...) do
+		local v = select(i, ...)
+		t[tonumber(v)] = 0
+	end
+	return t
+end
 
 
 local function CacheSet(set)
-	if not set then return end
-
-	local rset = set and sets[set]
-	if not rset then return end
-
-	if not cache[set] then
-		cache[set] = {}
-		for word in string.gmatch(rset, "%S+") do cache[set][tonumber(word)] = 0 end
-	end
-
+	if not set or not sets[set] then return end
+	if not cache[set] then cache[set] = TableStuffer(string.split(" ,", sets[set])) end
 	return true
 end
 
