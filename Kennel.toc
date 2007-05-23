@@ -1,4 +1,4 @@
-## Interface: 21000
+## Interface: 20100
 
 ## Title: Kennel
 ## Notes: Swap a random minipet every time you visit the bank
