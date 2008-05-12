@@ -8,12 +8,9 @@
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Inventory
 
-## OptionalDeps: Dongle
-
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Bank: true
 
-Dongle.lua
 PeriodicTableMicro.lua
 
 Kennel.lua
