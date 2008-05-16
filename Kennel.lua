@@ -62,4 +62,4 @@ f:SetScript("OnEvent", function(self, event, ...)
 
 		if (pets.normal.player.num > 0 and pets.normal.bank.num > 0) or (pets.holiday.player.num > 0 and pets.holiday.bank.num > 0) then swapped = true end
 	end
-end
+end)
