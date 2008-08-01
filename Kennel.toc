@@ -1,16 +1,16 @@
-## Interface: 20400
+## Interface: 30000
 
 ## Title: Kennel
-## Notes: Swap a random minipet every time you visit the bank
+## Notes: Random pet summoner
 ## Author: Tekkub Stoutwrithe
 ## Version: Alpha
-## X-Website: http://code.google.com/p/tekkub-wow/
+## X-Website: http://www.tekkub.net/
 ## X-Email: tekkub-wow@googlegroups.com
 ## X-Category: Inventory
 
-## LoadManagers: AddonLoader
-## X-LoadOn-Bank: true
+## OptionalDeps: tekDebug
 
-PeriodicTableMicro.lua
+## LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
 
 Kennel.lua

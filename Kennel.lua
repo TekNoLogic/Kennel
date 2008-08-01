@@ -1,65 +1,75 @@
 ﻿
-------------------------------
---      Are you local?      --
-------------------------------
-
-local pt = PeriodicTableMicro
-PeriodicTableMicro = nil
-local bankopen, swapped = false, false
-local pets = {
-	normal = {player = {bag = {}, slot = {}, num = 0}, bank = {bag = {}, slot = {}, num = 0}},
-	holiday = {player = {bag = {}, slot = {}, num = 0}, bank = {bag = {}, slot = {}, num = 0}},
-}
+local debugf = tekDebug and tekDebug:GetFrame("Kennel")
+local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...)) end end
 
 
-local function DoSwaps(set)
-	local l, g = pets[set].player, pets[set].bank
-	if l.num == 0 then return end
-	for i=1,l.num do
-		local r = math.random(g.num + 1 - i)
+local DELAY = 2
 
-		PickupContainerItem(l.bag[i], l.slot[i])
-		PickupContainerItem(g.bag[r], g.slot[r])
-		table.remove(g.bag, r)
-		table.remove(g.slot, r)
-	end
+local f = CreateFrame("Frame")
+f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
+f:Hide()
+
+
+local numpets = 0
+local function PutTheCatOut(self, event)
+	Debug(event or "nil", HasFullControl() and "In control" or "Not in control", InCombatLockdown() and "In combat" or "Not in combat")
+
+	if InCombatLockdown() then return self:RegisterEvent("PLAYER_REGEN_ENABLED") end
+	if not HasFullControl() then return self:RegisterEvent("PLAYER_CONTROL_GAINED") end
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+
+	numpets = -1
+	local id, _, active
+	repeat
+		numpets = numpets + 1
+		id, _, _, active = GetCompanionInfo("CRITTER", numpets+1)
+		if active then return end
+	until not id
+
+	Debug("Queueing pet to be put out")
+	self:Show()
 end
 
 
-------------------------------
---			Event handlers			--
-------------------------------
+local ismoving, lx, ly, elapsed = false, 0, 0
+f:SetScript("OnShow", function() elapsed = 0 end)
+f:SetScript("OnUpdate", function(self, elap)
+	local x, y = GetPlayerMapPosition("player")
+	if lx == x and ly == y then ismoving = false
+	else ismoving, lx, ly = true, x, y end
 
-local f = CreateFrame("frame")
-f:RegisterEvent("BANKFRAME_OPENED")
-f:RegisterEvent("BANKFRAME_CLOSED")
-f:SetScript("OnEvent", function(self, event, ...)
-	if event == "BANKFRAME_CLOSED" then
-		if bankopen and swapped and FuBar_CorkFu then FuBar_CorkFu:GetModule("Minipet"):ActivatePet() end
-		bankopen = nil
-	else
-		bankopen, swapped = true, false
-		pets.normal.player.num, pets.normal.bank.num, pets.holiday.player.num, pets.holiday.bank.num = 0, 0, 0, 0
+	elapsed  = elapsed + elap
+	if elapsed < DELAY then return end
 
-		for bag=-1,11 do
-			local bagset = (bag <= 4) and (bag >= 0) and "player" or "bank"
-			for slot=1,GetContainerNumSlots(bag) do
-				local itemLink = GetContainerItemLink(bag, slot)
-				if (itemLink and pt(itemLink, "Minipet")) then
-					local n = pets.normal[bagset].num + 1
-					pets.normal[bagset].num, pets.normal[bagset].bag[n], pets.normal[bagset].slot[n] = n, bag, slot
-				elseif (itemLink and pt(itemLink, "Minipet - Holiday")) then
-					local n = pets.holiday[bagset].num + 1
-					pets.holiday[bagset].num, pets.holiday[bagset].bag[n], pets.holiday[bagset].slot[n] = n, bag, slot
-				end
-			end
-		end
-
-		if pets.normal.player.num > pets.normal.bank.num then pets.normal.player, pets.normal.bank = pets.normal.bank, pets.normal.player end
-		if pets.holiday.player.num > pets.holiday.bank.num then pets.holiday.player, pets.holiday.bank = pets.holiday.bank, pets.holiday.player end
-		DoSwaps("normal")
-		DoSwaps("holiday")
-
-		if (pets.normal.player.num > 0 and pets.normal.bank.num > 0) or (pets.holiday.player.num > 0 and pets.holiday.bank.num > 0) then swapped = true end
+	if ismoving or IsMounted() or UnitCastingInfo("player") then
+		elapsed = 0
+		return
 	end
+
+	Debug("Putting out pet")
+	if numpets > 0 then CallCompanion("CRITTER", math.random(numpets)) end
+	self:Hide()
 end)
+
+
+f.PLAYER_REGEN_ENABLED = PutTheCatOut
+f.PLAYER_CONTROL_GAINED = PutTheCatOut
+f.PLAYER_LOGIN = PutTheCatOut
+f.PLAYER_UNGHOST = PutTheCatOut
+
+
+function f:ZONE_CHANGED_NEW_AREA()
+	SetMapToCurrentZone()
+	PutTheCatOut(self, "ZONE_CHANGED_NEW_AREA")
+end
+
+
+function f:COMPANION_UPDATE(event, comptype)
+	if comptype ~= "CRITTER" then return end
+	PutTheCatOut(self, "COMPANION_UPDATE")
+end
+
+f:RegisterEvent("COMPANION_UPDATE")
+f:RegisterEvent("PLAYER_LOGIN")
+f:RegisterEvent("PLAYER_UNGHOST")
+f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
