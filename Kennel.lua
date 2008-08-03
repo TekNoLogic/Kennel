@@ -18,13 +18,7 @@ local function PutTheCatOut(self, event)
 	if not HasFullControl() then return self:RegisterEvent("PLAYER_CONTROL_GAINED") end
 	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
-	numpets = -1
-	local id, _, active
-	repeat
-		numpets = numpets + 1
-		id, _, _, active = GetCompanionInfo("CRITTER", numpets+1)
-		if active then return end
-	until not id
+	for i=1,GetNumCompanions("CRITTER") do if select(5, GetCompanionInfo("CRITTER", i)) then return end end
 
 	Debug("Queueing pet to be put out")
 	self:Show()
@@ -46,7 +40,8 @@ f:SetScript("OnUpdate", function(self, elap)
 		return
 	end
 
-	Debug("Putting out pet")
+	local numpets = GetNumCompanions("CRITTER")
+	Debug("Putting out pet", tostring(numpets))
 	if numpets > 0 then CallCompanion("CRITTER", math.random(numpets)) end
 	self:Hide()
 end)
