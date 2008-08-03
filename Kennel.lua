@@ -65,6 +65,7 @@ function f:COMPANION_UPDATE(event, comptype)
 end
 
 f:RegisterEvent("COMPANION_UPDATE")
-f:RegisterEvent("PLAYER_LOGIN")
 f:RegisterEvent("PLAYER_UNGHOST")
 f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
+
+if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else f:RegisterEvent("PLAYER_LOGIN") end
