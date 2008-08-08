@@ -1,0 +1,3 @@
+3.0.1.2-Beta
+    Complete rewrite for wrath
+    Now summons pets automatically!
