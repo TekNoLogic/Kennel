@@ -35,7 +35,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	elapsed  = elapsed + elap
 	if elapsed < DELAY then return end
 
-	if ismoving or IsMounted() or UnitCastingInfo("player") then
+	if ismoving or IsMounted() or IsFlying() or UnitCastingInfo("player") then
 		elapsed = 0
 		return
 	end
