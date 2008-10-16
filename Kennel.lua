@@ -38,7 +38,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	local _, instanceType = IsInInstance()
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
 
-	if pvpink or ismoving or IsMounted() or IsFlying() or UnitCastingInfo("player") then
+	if pvpink or ismoving or IsStealthed() or IsMounted() or IsFlying() or UnitCastingInfo("player") then
 		elapsed = 0
 		return
 	end
