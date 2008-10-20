@@ -4,6 +4,7 @@ local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...
 
 
 local DELAY = 2
+local blistzones = {["Throne of Kil'jaeden"] = true}
 
 local f = CreateFrame("Frame")
 f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
@@ -38,7 +39,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	local _, instanceType = IsInInstance()
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
 
-	if pvpink or ismoving or IsStealthed() or IsMounted() or IsFlying() or UnitCastingInfo("player") then
+	if pvpink or ismoving or IsStealthed() or IsMounted() or IsFlying() or UnitCastingInfo("player") or blistzones[GetSubZoneText()] then
 		elapsed = 0
 		return
 	end
