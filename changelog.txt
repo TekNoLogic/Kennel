@@ -1,3 +1,9 @@
+3.0.2.3-Release
+    Don't summon at Throne of Kil'jaeden
+    Don't do crap when stealthed either
+    Don't do anything when in BG or arena
+    Don't put out pet when flying (silly druids)
+
 3.0.1.2-Beta
     Complete rewrite for wrath
     Now summons pets automatically!
