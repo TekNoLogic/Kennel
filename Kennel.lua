@@ -26,20 +26,16 @@ local function PutTheCatOut(self, event)
 end
 
 
-local ismoving, lx, ly, elapsed = false, 0, 0
+local elapsed
 f:SetScript("OnShow", function() elapsed = 0 end)
 f:SetScript("OnUpdate", function(self, elap)
-	local x, y = GetPlayerMapPosition("player")
-	if lx == x and ly == y then ismoving = false
-	else ismoving, lx, ly = true, x, y end
-
 	elapsed  = elapsed + elap
 	if elapsed < DELAY then return end
 
 	local _, instanceType = IsInInstance()
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
 
-	if pvpink or ismoving or IsStealthed() or IsMounted() or IsFlying() or UnitCastingInfo("player") or blistzones[GetSubZoneText()] then
+	if pvpink or IsStealthed() or IsMounted() or IsFlying() or UnitCastingInfo("player") or blistzones[GetSubZoneText()] then
 		elapsed = 0
 		return
 	end
