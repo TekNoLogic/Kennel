@@ -1,3 +1,6 @@
+3.0.2.4-Release
+    No need to check movement, pets don't have a cast time anymore
+
 3.0.2.3-Release
     Don't summon at Throne of Kil'jaeden
     Don't do crap when stealthed either
