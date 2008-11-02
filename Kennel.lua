@@ -4,7 +4,7 @@ local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...
 
 
 local DELAY = 2
-local blistzones = {["Throne of Kil'jaeden"] = true}
+local blistzones = {["Throne of Kil'jaeden"] = true, ["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true}
 
 local f = CreateFrame("Frame")
 f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
