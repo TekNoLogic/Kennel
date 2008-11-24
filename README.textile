@@ -1,7 +1,0 @@
-Kennel is a simple minipet addon, it automatically puts out a random pet whenever you need one.  Kennel will not put out your pet if you are stealthed, mounted, flying, moving, casting, in an arena or BG.  Kennel will also avoid putting out a pet in certain subzones where a quest summons a pet for you.
-
-h2. Links
-
-<b>Visit "my site":http://www.tekkub.net/addons/Kennel for more info.<br>
-Please report all bugs and feature requests to my "Google Code":http://code.google.com/p/tekkub-wow/issues/list?can=1&q=addon:Kennel&sort=status+milestone&colspec=ID%20Type%20Status%20Addon%20Milestone%20Summary tracker<br>
-Please direct all feedback and questions to my "Google Groups":http://groups-beta.google.com/group/tekkub-wow mailinglist.</b>
