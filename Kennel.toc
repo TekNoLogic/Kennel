@@ -10,7 +10,12 @@
 
 ## OptionalDeps: tekDebug
 
+## SavedVariablesPerCharacter: KennelDBPC
+
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
 
+tekKonfig\tekKonfig.xml
+
 Kennel.lua
+Config.lua

@@ -3,6 +3,9 @@ local debugf = tekDebug and tekDebug:GetFrame("Kennel")
 local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...)) end end
 
 
+KennelDBPC = {}
+
+
 local DELAY = 2
 local blistzones = {
 	["Throne of Kil'jaeden"] = true,
@@ -45,8 +48,14 @@ f:SetScript("OnUpdate", function(self, elap)
 	end
 
 	local numpets = GetNumCompanions("CRITTER")
-	Debug("Putting out pet", tostring(numpets))
-	if numpets > 0 then CallCompanion("CRITTER", math.random(numpets)) end
+	if numpets > 0 then
+		local i = math.random(numpets)
+		local _, name, id = GetCompanionInfo("CRITTER", i)
+		if KennelDBPC[id] then return end
+		Debug("Putting out pet", name)
+		CallCompanion("CRITTER", i)
+	end
+
 	self:Hide()
 end)
 
