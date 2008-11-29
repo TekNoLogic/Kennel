@@ -1,3 +1,6 @@
+3.0.3.7-Beta
+    Add config to disable pets, or the entire addon
+
 3.0.3.6-Release
     Failsafe for cases where you are not in combat when a pet is needed, but you enter combat before it gets put out
     SAY IT FRENCHIE!  SAY "Throne of Kil'jaeden"
