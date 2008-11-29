@@ -9,7 +9,14 @@ frame.name = "Kennel"
 frame:SetScript("OnShow", function(frame)
 	local title, subtitle = LibStub("tekKonfig-Heading").new(frame, "Kennel", "This panel allows you to select which pets Kennel will put out.")
 
-	local group = LibStub("tekKonfig-Group").new(frame, "Furry bastards", "TOP", subtitle, "BOTTOM", 0, -GAP)
+
+	local enabled = LibStub("tekKonfig-Checkbox").new(frame, nil, "Enabled", "TOPLEFT", subtitle, "BOTTOMLEFT", -2, -GAP)
+	local checksound = enabled:GetScript("OnClick")
+	enabled:SetScript("OnClick", function(self) checksound(self); KennelDBPC.disabled = not KennelDBPC.disabled end)
+	enabled:SetChecked(not KennelDBPC.disabled)
+
+
+	local group = LibStub("tekKonfig-Group").new(frame, "Furry bastards", "TOP", enabled, "BOTTOM", 0, -GAP-4)
 	group:SetPoint("LEFT", EDGEGAP, 0)
 	group:SetPoint("BOTTOMRIGHT", -EDGEGAP, EDGEGAP)
 

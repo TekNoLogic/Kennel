@@ -36,6 +36,8 @@ end
 local elapsed
 f:SetScript("OnShow", function() elapsed = 0 end)
 f:SetScript("OnUpdate", function(self, elap)
+	if KennelDBPC.disabled then return end
+
 	elapsed  = elapsed + elap
 	if elapsed < DELAY then return end
 
