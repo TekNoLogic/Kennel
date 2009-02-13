@@ -1,5 +1,5 @@
 ﻿
-local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 7, 9, 32, 8, 16
+local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 7, 8, 32, 8, 16
 local rows = {}
 
 
@@ -18,6 +18,12 @@ frame:SetScript("OnShow", function(frame)
 	local group = LibStub("tekKonfig-Group").new(frame, "Furry bastards", "TOP", enabled, "BOTTOM", 0, -GAP-4)
 	group:SetPoint("LEFT", EDGEGAP, 0)
 	group:SetPoint("BOTTOMRIGHT", -EDGEGAP, EDGEGAP)
+
+	local scrollbar = LibStub("tekKonfig-Scroll").new(group, 6, 1)
+
+	group:EnableMouseWheel()
+	group:SetScript("OnMouseWheel", function(self, val) scrollbar:SetValue(scrollbar:GetValue() - val) end)
+
 
 	local function OnClick(self) KennelDBPC[self.id] = not KennelDBPC[self.id] end
 	local function ShowTooltip(self)
@@ -59,11 +65,14 @@ frame:SetScript("OnShow", function(frame)
 		end
 	end
 
+	local offset = 0
 	local function Update()
+		scrollbar:SetMinMaxValues(0, math.max(0, math.ceil(GetNumCompanions("CRITTER")/NUMCOLS - NUMROWS)))
+
 		for i=1,NUMROWS do
 			for j=1,NUMCOLS do
-				local butt, offset = rows[i].buttons[j], (i-1)*NUMCOLS + j
-				local _, name, id, tex = GetCompanionInfo("CRITTER", offset)
+				local butt, buttoffset = rows[i].buttons[j], (i+offset-1)*NUMCOLS + j
+				local _, name, id, tex = GetCompanionInfo("CRITTER", buttoffset)
 				if name then
 					butt.name, butt.id = name, id
 					butt:SetNormalTexture(tex)
@@ -76,8 +85,15 @@ frame:SetScript("OnShow", function(frame)
 		end
 	end
 
+	local f = scrollbar:GetScript("OnValueChanged")
+	scrollbar:SetScript("OnValueChanged", function(self, value, ...)
+		offset = math.floor(value)
+		Update()
+		return f(self, value, ...)
+	end)
+
 	Update()
-	frame:SetScript("OnShow", Update)
+	scrollbar:SetValue(0)
 end)
 
 
