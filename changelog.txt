@@ -1,3 +1,7 @@
+3.0.9.8-Beta
+    Add scrollbar, for those fuckers tha have more pets than me.
+    Don't put pets out when priests proc improved death
+
 3.0.3.7-Beta
     Add config to disable pets, or the entire addon
 
