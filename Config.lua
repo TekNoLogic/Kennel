@@ -1,5 +1,5 @@
 ﻿
-local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 7, 8, 32, 8, 16
+local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 6, 8, 32, 8, 16
 local rows = {}
 
 
@@ -14,8 +14,12 @@ frame:SetScript("OnShow", function(frame)
 	enabled:SetScript("OnClick", function(self) checksound(self); KennelDBPC.disabled = not KennelDBPC.disabled end)
 	enabled:SetChecked(not KennelDBPC.disabled)
 
+	local mountdismiss = LibStub("tekKonfig-Checkbox").new(frame, nil, "Dismiss when mounted", "TOPLEFT", enabled, "BOTTOMLEFT", 0, -4)
+	mountdismiss:SetScript("OnClick", function(self) checksound(self); KennelDBPC.dismissonmount = not KennelDBPC.dismissonmount end)
+	mountdismiss:SetChecked(KennelDBPC.dismissonmount)
 
-	local group = LibStub("tekKonfig-Group").new(frame, "Furry bastards", "TOP", enabled, "BOTTOM", 0, -GAP-4)
+
+	local group = LibStub("tekKonfig-Group").new(frame, "Furry bastards", "TOP", mountdismiss, "BOTTOM", 0, -GAP-14)
 	group:SetPoint("LEFT", EDGEGAP, 0)
 	group:SetPoint("BOTTOMRIGHT", -EDGEGAP, EDGEGAP)
 
@@ -94,6 +98,7 @@ frame:SetScript("OnShow", function(frame)
 
 	Update()
 	scrollbar:SetValue(0)
+	frame:SetScript("OnShow", nil)
 end)
 
 

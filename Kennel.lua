@@ -75,8 +75,15 @@ end
 
 
 function f:COMPANION_UPDATE(event, comptype)
-	if comptype ~= "CRITTER" then return end
-	PutTheCatOut(self, "COMPANION_UPDATE")
+local wasmounted
+	if comptype == "CRITTER" then return PutTheCatOut(self, "COMPANION_UPDATE") end
+	if comptype == "MOUNT" then
+		local found
+		for i=1,GetNumCompanions("CRITTER") do found = found or select(5, GetCompanionInfo("MOUNT", i)) end
+		if KennelDBPC.dismissonmount and found and not wasmounted then DismissCompanion("CRITTER") end
+		wasmounted = found
+		return
+	end
 end
 
 f:RegisterEvent("COMPANION_UPDATE")
