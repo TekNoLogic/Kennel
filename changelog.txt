@@ -1,3 +1,6 @@
+3.0.9.9-Beta
+    Add option to dismiss pet when mounted
+
 3.0.9.8-Beta
     Add scrollbar, for those fuckers tha have more pets than me.
     Don't put pets out when priests proc improved death
