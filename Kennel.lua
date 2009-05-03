@@ -3,11 +3,8 @@ local debugf = tekDebug and tekDebug:GetFrame("Kennel")
 local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...)) end end
 
 
-KennelDBPC = {}
-
-
 local DELAY = 2
-local blistzones = {
+local blistzones, db = {
 	["Throne of Kil'jaeden"] = true,
 	["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true, -- ruRU
 	["Tr\195\180ne de Kil'jaeden"] = true, -- frFR
@@ -33,6 +30,23 @@ local function PutTheCatOut(self, event)
 end
 
 
+local function GetRandomPet()
+	local numpets = GetNumCompanions("CRITTER")
+	if not f.nlow then
+		f.nlow = 0
+		for i=1,numpets do
+			local _, name, id = GetCompanionInfo("CRITTER", i)
+			if db[id] == 1 then f.nlow = f.nlow +  1 end
+		end
+	end
+	if numpets > 0 then
+		local i = math.random(numpets)
+		local _, name, id = GetCompanionInfo("CRITTER", i)
+		if db[id] == 2 or db[id] == 1 and math.random(f.nlow) == 1 then return i, name end
+	end
+end
+
+
 local elapsed
 f:SetScript("OnShow", function() elapsed = 0 end)
 f:SetScript("OnUpdate", function(self, elap)
@@ -50,17 +64,43 @@ f:SetScript("OnUpdate", function(self, elap)
 		return
 	end
 
+	local peti, name = GetRandomPet()
+	if peti then
 	local numpets = GetNumCompanions("CRITTER")
-	if numpets > 0 then
-		local i = math.random(numpets)
-		local _, name, id = GetCompanionInfo("CRITTER", i)
-		if KennelDBPC[id] then return end
 		Debug("Putting out pet", name)
-		CallCompanion("CRITTER", i)
+		CallCompanion("CRITTER", peti)
+		self:Hide()
+	end
+end)
+
+
+f:RegisterEvent("ADDON_LOADED")
+
+
+function f:ADDON_LOADED(event, addon)
+	if addon:lower() ~= "kennel" then return end
+
+	KennelDBPC = KennelDBPC or {random = {}}
+	if not KennelDBPC.random then
+		for i,v in pairs(KennelDBPC) do KennelDBPC[i] = 0 end
+		KennelDBPC = {random = KennelDBPC}
+		KennelDBPC.disabled, KennelDBPC.random.disabled = KennelDBPC.random.disabled
 	end
 
-	self:Hide()
-end)
+	db = setmetatable(KennelDBPC.random, {__index = function() return 2 end})
+	self.randomdb = db
+
+	self:UnregisterEvent("ADDON_LOADED")
+	self.ADDON_LOADED = nil
+
+	if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else f:RegisterEvent("PLAYER_LOGIN") end
+	self:RegisterEvent("PLAYER_LOGOUT")
+end
+
+
+function f:PLAYER_LOGOUT()
+	for i,v in pairs(db) do if v == 2 then db[i] = nil end end
+end
 
 
 f.PLAYER_REGEN_ENABLED = PutTheCatOut
@@ -91,4 +131,5 @@ f:RegisterEvent("COMPANION_UPDATE")
 f:RegisterEvent("PLAYER_UNGHOST")
 f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
-if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else f:RegisterEvent("PLAYER_LOGIN") end
+
+KENNELFRAME = f

@@ -1,7 +1,8 @@
 ﻿
-local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 6, 8, 32, 8, 16
+local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 5, 8, 32, 8, 16
 local rows = {}
-
+local kennel = KENNELFRAME
+KENNELFRAME = nil
 
 local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
 frame.name = "Kennel"
@@ -29,7 +30,31 @@ frame:SetScript("OnShow", function(frame)
 	group:SetScript("OnMouseWheel", function(self, val) scrollbar:SetValue(scrollbar:GetValue() - val) end)
 
 
-	local function OnClick(self) KennelDBPC[self.id] = not KennelDBPC[self.id] end
+	local grouptext = group:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	grouptext:SetHeight(32)
+	grouptext:SetPoint("TOPLEFT", group, "TOPLEFT", EDGEGAP, -EDGEGAP)
+	grouptext:SetPoint("RIGHT", group, -EDGEGAP-16, 0)
+	grouptext:SetNonSpaceWrap(true)
+	grouptext:SetJustifyH("LEFT")
+	grouptext:SetJustifyV("TOP")
+	grouptext:SetText("These pets will be used at random.  Solid blue highlighted pets will be used more often.")
+
+
+	local function OnClick(self)
+		local v = kennel.randomdb[self.id] + 1
+		if v == 3 then v = 0 end
+		kennel.randomdb[self.id] = v
+
+		self:GetNormalTexture():SetDesaturated(v == 0)
+		self:SetChecked(v > 0)
+		self:GetCheckedTexture():SetAlpha(v/2)
+
+		kennel.nlow = 0
+		for i=1,GetNumCompanions("CRITTER") do
+			local _, name, id = GetCompanionInfo("CRITTER", i)
+			if db[id] == 1 then kennel.nlow = kennel.nlow +  1 end
+		end
+	end
 	local function ShowTooltip(self)
 		if not self.name then return end
 		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
@@ -41,7 +66,7 @@ frame:SetScript("OnShow", function(frame)
 	for i=1,NUMROWS do
 		local row = CreateFrame("Frame", nil, group)
 		row:SetHeight(ICONSIZE)
-		if i == 1 then row:SetPoint("TOPLEFT", group, EDGEGAP, -EDGEGAP)
+		if i == 1 then row:SetPoint("TOPLEFT", group, EDGEGAP, -EDGEGAP-ICONSIZE-6)
 		else row:SetPoint("TOPLEFT", rows[i-1], "BOTTOMLEFT", 0, -6) end
 		row:SetPoint("RIGHT", -EDGEGAP, 0)
 		row.buttons = {}
@@ -80,7 +105,9 @@ frame:SetScript("OnShow", function(frame)
 				if name then
 					butt.name, butt.id = name, id
 					butt:SetNormalTexture(tex)
-					butt:SetChecked(not KennelDBPC[id])
+					butt:GetNormalTexture():SetDesaturated(kennel.randomdb[id] == 0)
+					butt:SetChecked(kennel.randomdb[id] > 0)
+					butt:GetCheckedTexture():SetAlpha(kennel.randomdb[id]/2)
 					butt:Show()
 				else
 					butt:Hide()
