@@ -125,7 +125,7 @@ frame:SetScript("OnShow", function(frame)
 
 	Update()
 	scrollbar:SetValue(0)
-	frame:SetScript("OnShow", nil)
+	frame:SetScript("OnShow", Update)
 end)
 
 
