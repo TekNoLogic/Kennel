@@ -15,18 +15,14 @@ f:SetScript("OnEvent", function(self, event, ...) if self[event] then return sel
 f:Hide()
 
 
-local numpets = 0
-local function PutTheCatOut(self, event)
-	Debug(event or "nil", HasFullControl() and "In control" or "Not in control", InCombatLockdown() and "In combat" or "Not in combat")
-
-	if InCombatLockdown() then return self:RegisterEvent("PLAYER_REGEN_ENABLED") end
-	if not HasFullControl() then return self:RegisterEvent("PLAYER_CONTROL_GAINED") end
-	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
-
-	for i=1,GetNumCompanions("CRITTER") do if select(5, GetCompanionInfo("CRITTER", i)) then return end end
-
-	Debug("Queueing pet to be put out")
-	self:Show()
+local function GetZonePet()
+	local z, sz = GetZoneText(), GetSubZoneText()
+	local name = sz and sz ~= "" and KennelDBPC.zone[z .." - "..sz] or KennelDBPC.zone[z]
+	if not name then return end
+	for i=1,GetNumCompanions("CRITTER") do
+		local _, pname, id = GetCompanionInfo("CRITTER", i)
+		if pname == name then return i, pname end
+	end
 end
 
 
@@ -47,6 +43,30 @@ local function GetRandomPet()
 end
 
 
+local function SummonedPet()
+	for i=1,GetNumCompanions("CRITTER") do
+		local _, name, _, _, summoned = GetCompanionInfo("CRITTER", i)
+		if summoned then return name end
+	end
+end
+
+
+local numpets = 0
+local function PutTheCatOut(self, event)
+	Debug(event or "nil", HasFullControl() and "In control" or "Not in control", InCombatLockdown() and "In combat" or "Not in combat")
+
+	if InCombatLockdown() then return self:RegisterEvent("PLAYER_REGEN_ENABLED") end
+	if not HasFullControl() then return self:RegisterEvent("PLAYER_CONTROL_GAINED") end
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+
+	local summ, _, zonepet = SummonedPet(), GetZonePet()
+	if (not zonepet and summ) or (zonepet and zonepet == summ) then return end
+
+	Debug("Queueing pet to be put out")
+	self:Show()
+end
+
+
 local elapsed
 f:SetScript("OnShow", function() elapsed = 0 end)
 f:SetScript("OnUpdate", function(self, elap)
@@ -64,7 +84,8 @@ f:SetScript("OnUpdate", function(self, elap)
 		return
 	end
 
-	local peti, name = GetRandomPet()
+	local peti, name = GetZonePet()
+	if not peti then peti, name = GetRandomPet() end
 	if peti then
 	local numpets = GetNumCompanions("CRITTER")
 		Debug("Putting out pet", name)
@@ -80,12 +101,13 @@ f:RegisterEvent("ADDON_LOADED")
 function f:ADDON_LOADED(event, addon)
 	if addon:lower() ~= "kennel" then return end
 
-	KennelDBPC = KennelDBPC or {random = {}}
+	KennelDBPC = KennelDBPC or {random = {}, zone = {}}
 	if not KennelDBPC.random then
 		for i,v in pairs(KennelDBPC) do KennelDBPC[i] = 0 end
 		KennelDBPC = {random = KennelDBPC}
 		KennelDBPC.disabled, KennelDBPC.random.disabled = KennelDBPC.random.disabled
 	end
+	if not KennelDBPC.zone then KennelDBPC.zone = {} end
 
 	db = setmetatable(KennelDBPC.random, {__index = function() return 2 end})
 	self.randomdb = db
@@ -107,12 +129,9 @@ f.PLAYER_REGEN_ENABLED = PutTheCatOut
 f.PLAYER_CONTROL_GAINED = PutTheCatOut
 f.PLAYER_LOGIN = PutTheCatOut
 f.PLAYER_UNGHOST = PutTheCatOut
-
-
-function f:ZONE_CHANGED_NEW_AREA()
-	SetMapToCurrentZone()
-	PutTheCatOut(self, "ZONE_CHANGED_NEW_AREA")
-end
+f.ZONE_CHANGED = PutTheCatOut
+f.ZONE_CHANGED_INDOORS = PutTheCatOut
+f.ZONE_CHANGED_NEW_AREA = PutTheCatOut
 
 
 function f:COMPANION_UPDATE(event, comptype)
@@ -129,6 +148,8 @@ end
 
 f:RegisterEvent("COMPANION_UPDATE")
 f:RegisterEvent("PLAYER_UNGHOST")
+f:RegisterEvent("ZONE_CHANGED")
+f:RegisterEvent("ZONE_CHANGED_INDOORS")
 f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
 
 

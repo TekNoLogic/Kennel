@@ -6,7 +6,10 @@ KENNELFRAME = nil
 
 local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
 frame.name = "Kennel"
+frame:Hide()
 frame:SetScript("OnShow", function(frame)
+	local tektab = LibStub("tekKonfig-TopTab")
+
 	local title, subtitle = LibStub("tekKonfig-Heading").new(frame, "Kennel", "This panel allows you to select which pets Kennel will put out.")
 
 
@@ -20,25 +23,49 @@ frame:SetScript("OnShow", function(frame)
 	mountdismiss:SetChecked(KennelDBPC.dismissonmount)
 
 
-	local group = LibStub("tekKonfig-Group").new(frame, "Furry bastards", "TOP", mountdismiss, "BOTTOM", 0, -GAP-14)
+	local group = LibStub("tekKonfig-Group").new(frame, nil, "TOP", mountdismiss, "BOTTOM", 0, -GAP-14)
 	group:SetPoint("LEFT", EDGEGAP, 0)
 	group:SetPoint("BOTTOMRIGHT", -EDGEGAP, EDGEGAP)
 
-	local scrollbar = LibStub("tekKonfig-Scroll").new(group, 6, 1)
 
-	group:EnableMouseWheel()
-	group:SetScript("OnMouseWheel", function(self, val) scrollbar:SetValue(scrollbar:GetValue() - val) end)
+	local randoms, zones
+	local tab1 = tektab.new(frame, "Random", "BOTTOMLEFT", group, "TOPLEFT", 0, -4)
+	local tab2 = tektab.new(frame, "Zone", "LEFT", tab1, "RIGHT", -15, 0)
+	tab2:Deactivate()
+	tab1:SetScript("OnClick", function(self)
+		self:Activate()
+		tab2:Deactivate()
+		randoms:Show()
+		zones:Hide()
+	end)
+	tab2:SetScript("OnClick", function(self)
+		self:Activate()
+		tab1:Deactivate()
+		randoms:Hide()
+		zones:Show()
+	end)
 
 
-	local grouptext = group:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-	grouptext:SetHeight(32)
-	grouptext:SetPoint("TOPLEFT", group, "TOPLEFT", EDGEGAP, -EDGEGAP)
-	grouptext:SetPoint("RIGHT", group, -EDGEGAP-16, 0)
-	grouptext:SetNonSpaceWrap(true)
-	grouptext:SetJustifyH("LEFT")
-	grouptext:SetJustifyV("TOP")
-	grouptext:SetText("These pets will be used at random.  Solid blue highlighted pets will be used more often.")
+	----------------------------
+	--      Random panel      --
+	----------------------------
 
+	randoms = CreateFrame("Frame", nil, group)
+	randoms:SetAllPoints()
+
+	local scrollbar = LibStub("tekKonfig-Scroll").new(randoms, 6, 1)
+
+	randoms:EnableMouseWheel()
+	randoms:SetScript("OnMouseWheel", function(self, val) scrollbar:SetValue(scrollbar:GetValue() - val) end)
+
+	local randomstext = randoms:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	randomstext:SetHeight(32)
+	randomstext:SetPoint("TOPLEFT", randoms, "TOPLEFT", EDGEGAP, -EDGEGAP)
+	randomstext:SetPoint("RIGHT", randoms, -EDGEGAP-16, 0)
+	randomstext:SetNonSpaceWrap(true)
+	randomstext:SetJustifyH("LEFT")
+	randomstext:SetJustifyV("TOP")
+	randomstext:SetText("These pets will be used at random.  Solid blue highlighted pets will be used more often.")
 
 	local function OnClick(self)
 		local v = kennel.randomdb[self.id] + 1
@@ -64,9 +91,9 @@ frame:SetScript("OnShow", function(frame)
 	local function HideTooltip() GameTooltip:Hide() end
 
 	for i=1,NUMROWS do
-		local row = CreateFrame("Frame", nil, group)
+		local row = CreateFrame("Frame", nil, randoms)
 		row:SetHeight(ICONSIZE)
-		if i == 1 then row:SetPoint("TOPLEFT", group, EDGEGAP, -EDGEGAP-ICONSIZE-6)
+		if i == 1 then row:SetPoint("TOPLEFT", randoms, EDGEGAP, -EDGEGAP-ICONSIZE-6)
 		else row:SetPoint("TOPLEFT", rows[i-1], "BOTTOMLEFT", 0, -6) end
 		row:SetPoint("RIGHT", -EDGEGAP, 0)
 		row.buttons = {}
@@ -125,7 +152,146 @@ frame:SetScript("OnShow", function(frame)
 
 	Update()
 	scrollbar:SetValue(0)
-	frame:SetScript("OnShow", Update)
+	randoms:SetScript("OnShow", Update)
+
+
+	--------------------------
+	--      Zone panel      --
+	--------------------------
+
+	zones = CreateFrame("Frame", nil, group)
+	zones:SetAllPoints()
+	zones:Hide()
+
+	local scrollbar = LibStub("tekKonfig-Scroll").new(zones, 6, 1)
+
+	zones:EnableMouseWheel()
+	zones:SetScript("OnMouseWheel", function(self, val) scrollbar:SetValue(scrollbar:GetValue() - val) end)
+
+	local zonestext = zones:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+	zonestext:SetHeight(34)
+	zonestext:SetPoint("TOPLEFT", zones, "TOPLEFT", EDGEGAP, -EDGEGAP)
+	zonestext:SetPoint("RIGHT", zones, -EDGEGAP-16, 0)
+	zonestext:SetNonSpaceWrap(true)
+	zonestext:SetJustifyH("LEFT")
+	zonestext:SetJustifyV("TOP")
+	zonestext:SetText("These pets will be used when you are in the corresponding zone or subzone.  Summon the desired pet and click an 'add' button to set that pet for the current zone or subzone.")
+
+
+	local NUMROWS = 10
+	local ROWHEIGHT = 15
+	local rows, Update, selectedzone = {}
+	local function OnClick(self)
+		selectedzone = self.zone:GetText()
+		Update()
+	end
+	for i=1,NUMROWS do
+		local row = CreateFrame("CheckButton", nil, zones)
+		row:SetHeight(ROWHEIGHT)
+		if i == 1 then row:SetPoint("TOP", zonestext, "BOTTOM", 0, -8)
+		else row:SetPoint("TOP", rows[i-1], "BOTTOM") end
+		row:SetPoint("LEFT", 4, 0)
+		row:SetPoint("RIGHT", scrollbar, "LEFT", -4, 0)
+
+		local highlight = row:CreateTexture()
+		highlight:SetTexture("Interface\\HelpFrame\\HelpFrameButton-Highlight")
+		highlight:SetTexCoord(0, 1, 0, 0.578125)
+		highlight:SetAllPoints()
+		row:SetHighlightTexture(highlight)
+		row:SetCheckedTexture(highlight)
+
+		local textzone = row:CreateFontString(nil, nil, "GameFontNormalSmall")
+		textzone:SetPoint("LEFT", EDGEGAP + GAP, 0)
+		local textpet = row:CreateFontString(nil, nil, "GameFontHighlightSmall")
+		textpet:SetPoint("LEFT", textzone, "RIGHT", GAP, 0)
+		textpet:SetPoint("RIGHT", -GAP, 0)
+		textpet:SetJustifyH("RIGHT")
+
+		row:SetScript("OnClick", OnClick)
+
+		row.zone = textzone
+		row.pet = textpet
+		textzone:SetText("Testing zone")
+		textpet:SetText("Test pet")
+		rows[i] = row
+	end
+
+	local offset, deletebutt, sortedzones = 0
+	function Update()
+		if not sortedzones then
+			sortedzones = {}
+			for i in pairs(KennelDBPC.zone) do table.insert(sortedzones, i) end
+			table.sort(sortedzones)
+		end
+
+		scrollbar:SetMinMaxValues(0, math.max(0, #sortedzones - NUMROWS))
+
+		local selectedvisible
+		for i,row in pairs(rows) do
+			local zone = sortedzones[i + offset]
+			local pet = zone and KennelDBPC.zone[zone]
+			if pet then
+				row.zone:SetText(zone)
+				row.pet:SetText(pet)
+				row:SetChecked(zone == selectedzone)
+				selectedvisible = selectedvisible or zone == selectedzone
+				row:Show()
+			else
+				row:Hide()
+			end
+		end
+
+		if selectedvisible then deletebutt:Enable() else deletebutt:Disable() end
+	end
+
+	local function GetCurrentPet()
+		for i=1,GetNumCompanions("CRITTER") do
+			local _, name, _, _, summoned = GetCompanionInfo("CRITTER", i)
+			if summoned then return name end
+		end
+	end
+
+	local addzone = LibStub("tekKonfig-Button").new(zones, "BOTTOMLEFT", zones, "BOTTOMLEFT", EDGEGAP, EDGEGAP):MakeSmall()
+	addzone.tiptext = "Click to set the currently summoned pet to be used in the current zone."
+	addzone:SetText("Add zone")
+	addzone:SetScript("OnClick", function()
+		KennelDBPC.zone[GetZoneText()] = GetCurrentPet()
+		sortedzones, selectedzone = nil
+		Update()
+	end)
+
+	local addsubzone = LibStub("tekKonfig-Button").new(zones, "LEFT", addzone, "RIGHT", GAP/2, 0):MakeSmall()
+	addsubzone.tiptext = "Click to set the currently summoned pet to be used in the current subzone."
+	addsubzone:SetText("Add subzone")
+	addsubzone:SetScript("OnShow", function(self) if GetSubZoneText() == "" then self:Disable() else self:Enable() end end)
+	addsubzone:SetScript("OnClick", function()
+		KennelDBPC.zone[GetZoneText() .." - "..GetSubZoneText()] = GetCurrentPet()
+		sortedzones, selectedzone = nil
+		Update()
+	end)
+
+	deletebutt = LibStub("tekKonfig-Button").new(zones, "BOTTOM", zones, "BOTTOM", 0, EDGEGAP):MakeSmall():MakeGrey()
+	deletebutt:SetPoint("RIGHT", scrollbar, "LEFT", -EDGEGAP, 0)
+	deletebutt.tiptext = "Remove the currently selected zone-pet setting."
+	deletebutt:SetText("Delete")
+	deletebutt:SetScript("OnClick", function()
+		KennelDBPC.zone[selectedzone], sortedzones, selectedzone = nil
+		Update()
+	end)
+
+	local f = scrollbar:GetScript("OnValueChanged")
+	scrollbar:SetScript("OnValueChanged", function(self, value, ...)
+		offset = math.floor(value)
+		Update()
+		return f(self, value, ...)
+	end)
+
+	Update()
+	scrollbar:SetValue(0)
+	zones:SetScript("OnShow", Update)
+
+
+	frame:SetScript("OnShow", nil)
 end)
 
 
