@@ -1,3 +1,8 @@
+3.1.0.10-Beta
+    Add per-zone pet options
+    Add weighted-random summon options
+    Don't put out pet if eating or drinking
+
 3.0.9.9-Beta
     Add option to dismiss pet when mounted
 
