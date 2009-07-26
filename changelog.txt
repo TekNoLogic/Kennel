@@ -1,3 +1,7 @@
+3.1.0.11-Beta
+    De-localize buff checks (thanks Adirelle)
+    Don't put pet out if channelling (thanks Adirelle)
+
 3.1.0.10-Beta
     Add per-zone pet options
     Add weighted-random summon options
