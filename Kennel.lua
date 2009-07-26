@@ -3,6 +3,8 @@ local debugf = tekDebug and tekDebug:GetFrame("Kennel")
 local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...)) end end
 
 
+local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
+
 local DELAY = 2
 local blistzones, db = {
 	["Throne of Kil'jaeden"] = true,
@@ -79,7 +81,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
 
 	if pvpink or InCombatLockdown() or IsStealthed() or IsMounted() or IsFlying() or UnitCastingInfo("player") or UnitChannelInfo("player") or blistzones[GetSubZoneText()]
-		or UnitBuff("player", "Spirit of Redemption") or UnitBuff("player", "Food") or UnitBuff("player", "Drink") then
+		or UnitBuff("player", SOR) or UnitBuff("player", FOOD) or UnitBuff("player", DRINK) then
 		elapsed = 0
 		return
 	end
