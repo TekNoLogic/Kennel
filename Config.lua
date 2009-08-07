@@ -79,7 +79,7 @@ frame:SetScript("OnShow", function(frame)
 		kennel.nlow = 0
 		for i=1,GetNumCompanions("CRITTER") do
 			local _, name, id = GetCompanionInfo("CRITTER", i)
-			if db[id] == 1 then kennel.nlow = kennel.nlow +  1 end
+			if kennel.randomdb[id] == 1 then kennel.nlow = kennel.nlow +  1 end
 		end
 	end
 	local function ShowTooltip(self)
