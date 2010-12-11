@@ -8,6 +8,7 @@ local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(4
 local DELAY = 2
 local blistzones, db = {
 	["Throne of Kil'jaeden"] = true,
+	["Shallow's End"] = true,
 	["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true, -- ruRU
 	["Tr\195\180ne de Kil'jaeden"] = true, -- frFR
 }
