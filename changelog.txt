@@ -1,3 +1,7 @@
+4.0.0.13-Beta
+    SEAHORSIE!
+    Add quick config access button to pet panel
+
 3.2.0.12-Beta
     Fix nil error in config
     No petting while falling
