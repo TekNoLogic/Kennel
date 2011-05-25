@@ -4,6 +4,8 @@ local rows = {}
 local kennel = KENNELFRAME
 KENNELFRAME = nil
 
+if AddonLoader and AddonLoader.RemoveInterfaceOptions then AddonLoader:RemoveInterfaceOptions("Kennel") end
+
 local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
 frame.name = "Kennel"
 frame:Hide()
