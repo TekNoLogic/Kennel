@@ -6,7 +6,7 @@ local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...
 local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
 
 local DELAY = 2
-local blistzones, blistpets, db = {
+local blistzones, blistpets, snowballpets, db = {
 	["Throne of Kil'jaeden"] = true,
 	["Shallow's End"] = true,
 	["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true, -- ruRU
@@ -16,6 +16,11 @@ local blistzones, blistpets, db = {
 	[92396] = true, -- Guild Page
 	[92397] = true, -- Guild Herald
 	[92398] = true, -- Guild Herald
+}, {
+	[26045] = true, -- Tiny Snowman
+	[26529] = true, -- Winter Reindeer
+	[26533] = true, -- Father Winter's Helper
+	[26541] = true, -- Winter's Little Helper
 }
 
 local f = CreateFrame("Frame")
@@ -36,17 +41,18 @@ end
 
 local function GetRandomPet()
 	local numpets = GetNumCompanions("CRITTER")
+	local hasballs = (GetItemCount(17202) or 0) > 0
 	if not f.nlow then
 		f.nlow = 0
 		for i=1,numpets do
 			local _, name, id = GetCompanionInfo("CRITTER", i)
-			if not blistpets[id] and db[id] == 1 then f.nlow = f.nlow +  1 end
+			if not blistpets[id] and (hasballs or not snowballpets[id]) and db[id] == 1 then f.nlow = f.nlow +  1 end
 		end
 	end
 	if numpets > 0 then
 		local i = math.random(numpets)
 		local _, name, id = GetCompanionInfo("CRITTER", i)
-		if not blistpets[id] and db[id] == 2 or db[id] == 1 and math.random(f.nlow) == 1 then return i, name end
+		if not blistpets[id] and (hasballs or not snowballpets[id]) and db[id] == 2 or db[id] == 1 and math.random(f.nlow) == 1 then return i, name end
 	end
 end
 
