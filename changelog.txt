@@ -1,3 +1,8 @@
+4.2.0.14-Beta
+    Don't put out xmas pets if we have no balls
+    Never put out "guild pets"
+    Nice new big config panel for 4.2
+
 4.0.0.13-Beta
     SEAHORSIE!
     Add quick config access button to pet panel
