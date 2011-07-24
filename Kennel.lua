@@ -6,11 +6,16 @@ local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...
 local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
 
 local DELAY = 2
-local blistzones, db = {
+local blistzones, blistpets, db = {
 	["Throne of Kil'jaeden"] = true,
 	["Shallow's End"] = true,
 	["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true, -- ruRU
 	["Tr\195\180ne de Kil'jaeden"] = true, -- frFR
+}, {
+	[92395] = true, -- Guild Page
+	[92396] = true, -- Guild Page
+	[92397] = true, -- Guild Herald
+	[92398] = true, -- Guild Herald
 }
 
 local f = CreateFrame("Frame")
@@ -35,13 +40,13 @@ local function GetRandomPet()
 		f.nlow = 0
 		for i=1,numpets do
 			local _, name, id = GetCompanionInfo("CRITTER", i)
-			if db[id] == 1 then f.nlow = f.nlow +  1 end
+			if not blistpets[id] and db[id] == 1 then f.nlow = f.nlow +  1 end
 		end
 	end
 	if numpets > 0 then
 		local i = math.random(numpets)
 		local _, name, id = GetCompanionInfo("CRITTER", i)
-		if db[id] == 2 or db[id] == 1 and math.random(f.nlow) == 1 then return i, name end
+		if not blistpets[id] and db[id] == 2 or db[id] == 1 and math.random(f.nlow) == 1 then return i, name end
 	end
 end
 
