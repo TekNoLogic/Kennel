@@ -103,7 +103,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	if peti then
 	local numpets = GetNumCompanions("CRITTER")
 		Debug("Putting out pet", name)
-		CallCompanion("CRITTER", peti)
+		C_PetJournal.SummonPetByID(C_PetJournal.GetPetInfoByIndex(peti))
 		self:Hide()
 	end
 end)
