@@ -163,7 +163,7 @@ local wasmounted
 	if comptype == "CRITTER" then return PutTheCatOut(self, "COMPANION_UPDATE") end
 	if comptype == "MOUNT" then
 		local found
-		for i=1,GetNumCompanions("CRITTER") do found = found or select(5, GetCompanionInfo("MOUNT", i)) end
+		for i=1,GetNumCompanions("MOUNT") do found = found or select(5, GetCompanionInfo("MOUNT", i)) end
 		if KennelDBPC.dismissonmount and found and not wasmounted then DismissCompanion("CRITTER") end
 		wasmounted = found
 		return
