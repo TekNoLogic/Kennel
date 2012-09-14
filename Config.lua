@@ -1,4 +1,7 @@
 ﻿
+local myname, ns = ...
+
+
 local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 8, 4, 32, 8, 16
 local rows = {}
 local kennel = KENNELFRAME
@@ -311,15 +314,17 @@ InterfaceOptions_AddCategory(frame)
 LibStub("tekKonfig-AboutPanel").new("Kennel", "Kennel")
 
 
-local butt = CreateFrame("Button", nil, SpellBookCompanionsFrame)
-butt:SetWidth(32) butt:SetHeight(32)
-butt:SetPoint("TOPRIGHT", -25, -40)
-butt:SetNormalTexture("Interface\\Icons\\INV_Box_PetCarrier_01")
-butt:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
-butt:SetScript("OnClick", function() InterfaceOptionsFrame_OpenToCategory(frame) end)
-butt:SetScript("OnEnter", function(self)
-	GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-	GameTooltip:SetText("Open Kennel config")
-	GameTooltip:Show()
-end)
-butt:SetScript("OnLeave", function() GameTooltip:Hide() end)
+function ns.makebutt()
+	local butt = CreateFrame("Button", nil, PetJournal)
+	butt:SetWidth(32) butt:SetHeight(32)
+	butt:SetPoint("TOPLEFT", 225, -28)
+	butt:SetNormalTexture("Interface\\Icons\\INV_Box_PetCarrier_01")
+	butt:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square")
+	butt:SetScript("OnClick", function() InterfaceOptionsFrame_OpenToCategory(frame) end)
+	butt:SetScript("OnEnter", function(self)
+		GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+		GameTooltip:SetText("Open Kennel config")
+		GameTooltip:Show()
+	end)
+	butt:SetScript("OnLeave", function() GameTooltip:Hide() end)
+end

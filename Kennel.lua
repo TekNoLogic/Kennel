@@ -1,4 +1,7 @@
 ﻿
+local myname, ns = ...
+
+
 local debugf = tekDebug and tekDebug:GetFrame("Kennel")
 local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...)) end end
 
@@ -123,24 +126,38 @@ f:RegisterEvent("ADDON_LOADED")
 
 
 function f:ADDON_LOADED(event, addon)
-	if addon:lower() ~= "kennel" then return end
+	if addon == 'Blizzard_PetJournal' then self:JournalLoaded()
+	elseif addon == myname then
+		KennelDBPC = KennelDBPC or {random = {}, zone = {}}
+		if not KennelDBPC.random then
+			for i,v in pairs(KennelDBPC) do KennelDBPC[i] = 0 end
+			KennelDBPC = {random = KennelDBPC}
+			KennelDBPC.disabled = KennelDBPC.random.disabled
+			KennelDBPC.random.disabled = nil
+		end
+		if not KennelDBPC.zone then KennelDBPC.zone = {} end
 
-	KennelDBPC = KennelDBPC or {random = {}, zone = {}}
-	if not KennelDBPC.random then
-		for i,v in pairs(KennelDBPC) do KennelDBPC[i] = 0 end
-		KennelDBPC = {random = KennelDBPC}
-		KennelDBPC.disabled, KennelDBPC.random.disabled = KennelDBPC.random.disabled
+		db = setmetatable(KennelDBPC.random, {__index = function() return 2 end})
+		self.randomdb = db
+
+		self:RegisterEvent("PLAYER_LOGOUT")
+		if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else
+			f:RegisterEvent("PLAYER_LOGIN")
+		end
+
+		if IsAddOnLoaded("Blizzard_PetJournal") then self:JournalLoaded() end
 	end
-	if not KennelDBPC.zone then KennelDBPC.zone = {} end
+end
 
-	db = setmetatable(KennelDBPC.random, {__index = function() return 2 end})
-	self.randomdb = db
+
+function f:JournalLoaded()
+	ns.makebutt()
 
 	self:UnregisterEvent("ADDON_LOADED")
-	self.ADDON_LOADED = nil
 
-	if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else f:RegisterEvent("PLAYER_LOGIN") end
-	self:RegisterEvent("PLAYER_LOGOUT")
+	self.ADDON_LOADED = nil
+	self.JournalLoaded = nil
+	ns.makebutt = nil
 end
 
 
