@@ -58,10 +58,9 @@ end
 
 
 local function SummonedPet()
-	for i=1,GetNumCompanions("CRITTER") do
-		local _, name, _, _, summoned = GetCompanionInfo("CRITTER", i)
-		if summoned then return name end
-	end
+	local petID = C_PetJournal.GetSummonedPetID()
+	local _, customName = C_PetJournal.GetPetInfoByPetID(petID)
+	return customName
 end
 
 
