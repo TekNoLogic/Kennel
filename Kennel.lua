@@ -25,36 +25,54 @@ f:Hide()
 
 local function GetZonePet()
 	local z, sz = GetZoneText(), GetSubZoneText()
-	local name = sz and sz ~= "" and KennelDBPC.zone[z .." - "..sz] or KennelDBPC.zone[z]
-	if not name then return end
-	for i=1,GetNumCompanions("CRITTER") do
-		local _, pname, id = GetCompanionInfo("CRITTER", i)
-		if pname == name then return i, pname end
+	local zonepetname = sz and sz ~= "" and KennelDBPC.zone[z .." - "..sz] or KennelDBPC.zone[z]
+	if not zonepetname then return end
+
+	local _, numpets = C_PetJournal.GetNumPets(false)
+
+	for i=1,numpets do
+		local petID, _, _, customname, _, favorite, _, name, _, _, creatureID =
+			C_PetJournal.GetPetInfoByIndex(i, false)
+
+		if (customname or name) == zonepetname then
+			return petID, customname or name
+		end
 	end
 end
 
 
+local favs, allpets = {}, {}
 local function GetRandomPet()
-	local numpets = GetNumCompanions("CRITTER")
-	if not f.nlow then
-		f.nlow = 0
-		for i=1,numpets do
-			local _, name, id = GetCompanionInfo("CRITTER", i)
-			if not blistpets[id] and db[id] == 1 then f.nlow = f.nlow +  1 end
-		end
+	local _, numpets = C_PetJournal.GetNumPets(false)
+	for i in pairs(favs) do favs[i] = nil end
+	for i in pairs(allpets) do allpets[i] = nil end
+
+	for i=1,numpets do
+		local petID, _, _, customname, _, favorite, _, name, _, _, creatureID =
+			C_PetJournal.GetPetInfoByIndex(i, false)
+
+		if favorite then table.insert(favs, petID) end
+		if not blistpets[creatureID] then table.insert(allpets, petID) end
 	end
-	if numpets > 0 then
-		local i = math.random(numpets)
-		local _, name, id = GetCompanionInfo("CRITTER", i)
-		if not blistpets[id] and db[id] == 2 or db[id] == 1 and math.random(f.nlow) == 1 then return i, name end
-	end
+
+	if not next(allpets) then return end
+
+	-- Two out of three times, use a fav
+	local t = next(favs) and math.random(3) ~= 1 and favs or allpets
+	local i = math.random(#t)
+	local petID = t[i]
+	local _, customname, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
+
+	return petID, customname or name
 end
 
 
 local function SummonedPet()
 	local petID = C_PetJournal.GetSummonedPetID()
-	local _, customName = C_PetJournal.GetPetInfoByPetID(petID)
-	return customName
+	if not petID then return end
+
+	local _, customname = C_PetJournal.GetPetInfoByPetID(petID)
+	return customname
 end
 
 
@@ -91,12 +109,11 @@ f:SetScript("OnUpdate", function(self, elap)
 		return
 	end
 
-	local peti, name = GetZonePet()
-	if not peti then peti, name = GetRandomPet() end
-	if peti then
-	local numpets = GetNumCompanions("CRITTER")
-		Debug("Putting out pet", name)
-		C_PetJournal.SummonPetByID(C_PetJournal.GetPetInfoByIndex(peti))
+	local petID, name = GetZonePet()
+	if not petID then petID, name = GetRandomPet() end
+	if petID then
+		Debug("Putting out pet", name, petID)
+		C_PetJournal.SummonPetByID(petID)
 		self:Hide()
 	end
 end)
