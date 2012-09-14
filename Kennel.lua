@@ -71,8 +71,8 @@ local function SummonedPet()
 	local petID = C_PetJournal.GetSummonedPetID()
 	if not petID then return end
 
-	local _, customname = C_PetJournal.GetPetInfoByPetID(petID)
-	return customname
+	local _, customname, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
+	return customname or name
 end
 
 
