@@ -1,3 +1,6 @@
+5.0.1.15-Beta
+    Some fixes for 5.0
+
 4.2.0.14-Beta
     Don't put out xmas pets if we have no balls
     Never put out "guild pets"
