@@ -115,7 +115,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	local petID, name = GetZonePet()
 	if not petID then petID, name = GetRandomPet() end
 	if petID then
-		Debug("Putting out pet", name, petID)
+		Debug("Putting out pet", name or 'nil', petID)
 		C_PetJournal.SummonPetByID(petID)
 		self:Hide()
 	end
