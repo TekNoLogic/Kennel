@@ -2,9 +2,9 @@
 local myname, ns = ...
 
 
-local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
+local SOR, FOOD = GetSpellInfo(20711), GetSpellInfo(7737)
+local DRINK = GetSpellInfo(430)
 
-local DELAY = 2
 local blistzones = {
 	["Throne of Kil'jaeden"] = true,
 	["Shallow's End"] = true,
@@ -12,56 +12,48 @@ local blistzones = {
 	["Tr\195\180ne de Kil'jaeden"] = true, -- frFR
 }
 
-local f = CreateFrame("Frame")
-f:Hide()
 
-
-local function PutTheCatOut()
-	ns.Debug(HasFullControl() and "In control" or "Not in control",
-		       InCombatLockdown() and "In combat" or "Not in combat")
-
-	if InCombatLockdown() then
-		return ns.RegisterEvent("PLAYER_REGEN_ENABLED", PutTheCatOut)
-	end
-	if not HasFullControl() then
-		return ns.RegisterEvent("PLAYER_CONTROL_GAINED", PutTheCatOut)
-	end
-	ns.UnregisterEvent("PLAYER_REGEN_ENABLED")
-
-	if C_PetJournal.GetSummonedPetGUID() then return end
-
-	ns.Debug("Queueing pet to be put out")
-	f:Show()
-end
-
-
-local elapsed
-f:SetScript("OnShow", function() elapsed = 0 end)
-f:SetScript("OnUpdate", function(self, elap)
-	if KennelDBPC.disabled then return end
-
-	elapsed = elapsed + elap
-	if elapsed < DELAY then return end
+local function CannotDoIt()
+	if KennelDBPC.disabled then return true end
 
 	local _, instanceType = IsInInstance()
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
 
-	if pvpink or InCombatLockdown() or IsStealthed() or IsMounted() or IsFlying()
-		or IsFalling() or UnitCastingInfo("player") or UnitChannelInfo("player")
-		or blistzones[GetSubZoneText()] or UnitBuff("player", SOR)
-		or UnitBuff("player", FOOD) or UnitBuff("player", DRINK) then
+	return pvpink or InCombatLockdown() or IsStealthed() or IsMounted()
+		or IsFlying() or IsFalling() or UnitCastingInfo("player")
+		or UnitChannelInfo("player") or blistzones[GetSubZoneText()]
+		or UnitBuff("player", SOR) or UnitBuff("player", FOOD)
+		or UnitBuff("player", DRINK)
+end
 
-		elapsed = 0
-		return
-	end
+
+local function DoIt()
+	if CannotDoIt() then return ns.StartTimer(GetTime() + 10, DoIt) end
 
 	-- 1 in 3 times, we use all pets
 	local use_all = math.random(3) == 1
 	ns.Debug("Summoning random pet", use_all and "all" or "favs")
 	C_PetJournal.SummonRandomPet(use_all)
+end
 
-	self:Hide()
-end)
+
+local function PutTheCatOut()
+	if C_PetJournal.GetSummonedPetGUID() then return end
+
+	if InCombatLockdown() then
+		ns.Debug("In combat")
+		return ns.RegisterEvent("PLAYER_REGEN_ENABLED", PutTheCatOut)
+	end
+	if not HasFullControl() then
+		ns.Debug("Not in control")
+		return ns.RegisterEvent("PLAYER_CONTROL_GAINED", PutTheCatOut)
+	end
+	ns.UnregisterEvent("PLAYER_REGEN_ENABLED")
+	ns.UnregisterEvent("PLAYER_CONTROL_GAINED")
+
+	ns.Debug("Queueing pet to be put out")
+	ns.StartTimer(GetTime() + 10, DoIt)
+end
 
 
 ns.RegisterEvent("ADDON_LOADED", function(event, addon)
