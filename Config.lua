@@ -6,13 +6,11 @@ LibStub("tekKonfig-AboutPanel").new(nil, "Kennel")
 
 
 function ns.makebutt()
-	local enabled = LibStub("tekKonfig-Checkbox").new(PetJournal, 22, "Auto-summon", "BOTTOMLEFT", 168, 2)
-	local checksound = enabled:GetScript("OnClick")
-	enabled:SetScript("OnClick", function(self)
-		checksound(self)
-		ns.disabled = not ns.disabled
-	end)
-	enabled:SetChecked(true)
+	local check = ns.NewCheckBox(PetJournal, 22, "BOTTOMLEFT", 168, 2)
+	check:SetScript("OnClick", function(self) ns.disabled = not ns.disabled end)
+	check:SetChecked(true)
+
+	ns.NewCheckLabel(check, 'Auto-summon')
 
 	ns.UnregisterEvent("ADDON_LOADED")
 	ns.ADDON_LOADED = nil

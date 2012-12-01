@@ -20,6 +20,7 @@ tekKonfig\tekKonfig.xml
 externals\debug.lua
 externals\events.lua
 externals\timer.lua
+externals\ui-check.lua
 
 Kennel.lua
 Config.lua
