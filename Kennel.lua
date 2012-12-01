@@ -9,7 +9,7 @@ local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...
 local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
 
 local DELAY = 2
-local blistzones, blistpets, db = {
+local blistzones, blistpets = {
 	["Throne of Kil'jaeden"] = true,
 	["Shallow's End"] = true,
 	["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true, -- ruRU
@@ -107,19 +107,9 @@ f:RegisterEvent("ADDON_LOADED")
 function f:ADDON_LOADED(event, addon)
 	if addon == 'Blizzard_PetJournal' then self:JournalLoaded()
 	elseif addon == myname then
-		KennelDBPC = KennelDBPC or {random = {}, zone = {}}
-		if not KennelDBPC.random then
-			for i,v in pairs(KennelDBPC) do KennelDBPC[i] = 0 end
-			KennelDBPC = {random = KennelDBPC}
-			KennelDBPC.disabled = KennelDBPC.random.disabled
-			KennelDBPC.random.disabled = nil
-		end
+		KennelDBPC = KennelDBPC or {zone = {}}
 		if not KennelDBPC.zone then KennelDBPC.zone = {} end
 
-		db = setmetatable(KennelDBPC.random, {__index = function() return 2 end})
-		self.randomdb = db
-
-		self:RegisterEvent("PLAYER_LOGOUT")
 		if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else
 			f:RegisterEvent("PLAYER_LOGIN")
 		end
@@ -137,11 +127,6 @@ function f:JournalLoaded()
 	self.ADDON_LOADED = nil
 	self.JournalLoaded = nil
 	ns.makebutt = nil
-end
-
-
-function f:PLAYER_LOGOUT()
-	for i,v in pairs(db) do if v == 2 then db[i] = nil end end
 end
 
 
