@@ -26,33 +26,6 @@ f:SetScript("OnEvent", function(self, event, ...) if self[event] then return sel
 f:Hide()
 
 
-local function GetZonePet()
-	local z, sz = GetZoneText(), GetSubZoneText()
-	local zonepetname = sz and sz ~= "" and KennelDBPC.zone[z .." - "..sz] or KennelDBPC.zone[z]
-	if not zonepetname then return end
-
-	local _, numpets = C_PetJournal.GetNumPets(false)
-
-	for i=1,numpets do
-		local petID, _, _, customname, _, favorite, _, name, _, _, creatureID =
-			C_PetJournal.GetPetInfoByIndex(i, false)
-
-		if (customname or name) == zonepetname then
-			return petID, customname or name
-		end
-	end
-end
-
-
-local function SummonedPet()
-	local petID = C_PetJournal.GetSummonedPetGUID()
-	if not petID then return end
-
-	local _, customname, _, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
-	return customname or name
-end
-
-
 local numpets = 0
 local function PutTheCatOut(self, event)
 	Debug(event or "nil", HasFullControl() and "In control" or "Not in control", InCombatLockdown() and "In combat" or "Not in combat")
@@ -61,8 +34,7 @@ local function PutTheCatOut(self, event)
 	if not HasFullControl() then return self:RegisterEvent("PLAYER_CONTROL_GAINED") end
 	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
-	local summ, _, zonepet = SummonedPet(), GetZonePet()
-	if (not zonepet and summ) or (zonepet and zonepet == summ) then return end
+	if C_PetJournal.GetSummonedPetGUID() then return end
 
 	Debug("Queueing pet to be put out")
 	self:Show()
@@ -86,16 +58,10 @@ f:SetScript("OnUpdate", function(self, elap)
 		return
 	end
 
-	local petID, name = GetZonePet()
-	if petID then
-		Debug("Putting out pet", name or 'nil', petID)
-		C_PetJournal.SummonPetByGUID(petID)
-	else
-		-- 1 in 3 times, we use all pets
-		local use_all = math.random(3) == 1
-		Debug("Summoning random pet", use_all and "all" or "favs")
-		C_PetJournal.SummonRandomPet(use_all)
-	end
+	-- 1 in 3 times, we use all pets
+	local use_all = math.random(3) == 1
+	Debug("Summoning random pet", use_all and "all" or "favs")
+	C_PetJournal.SummonRandomPet(use_all)
 
 	self:Hide()
 end)
@@ -107,8 +73,7 @@ f:RegisterEvent("ADDON_LOADED")
 function f:ADDON_LOADED(event, addon)
 	if addon == 'Blizzard_PetJournal' then self:JournalLoaded()
 	elseif addon == myname then
-		KennelDBPC = KennelDBPC or {zone = {}}
-		if not KennelDBPC.zone then KennelDBPC.zone = {} end
+		KennelDBPC = KennelDBPC or {}
 
 		if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else
 			f:RegisterEvent("PLAYER_LOGIN")
@@ -172,6 +137,3 @@ f:RegisterEvent("PLAYER_UNGHOST")
 f:RegisterEvent("ZONE_CHANGED")
 f:RegisterEvent("ZONE_CHANGED_INDOORS")
 f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
-
-
-KENNELFRAME = f
