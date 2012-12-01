@@ -17,5 +17,7 @@
 
 tekKonfig\tekKonfig.xml
 
+externals\debug.lua
+
 Kennel.lua
 Config.lua

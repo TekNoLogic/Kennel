@@ -2,10 +2,6 @@
 local myname, ns = ...
 
 
-local debugf = tekDebug and tekDebug:GetFrame("Kennel")
-local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...)) end end
-
-
 local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
 
 local DELAY = 2
@@ -24,8 +20,8 @@ f:Hide()
 
 
 local function PutTheCatOut(self, event)
-	Debug(event or "nil", HasFullControl() and "In control" or "Not in control",
 		    InCombatLockdown() and "In combat" or "Not in combat")
+	ns.Debug(event or "nil", HasFullControl() and "In control" or "Not in control",
 
 	if InCombatLockdown() then
 		return self:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -37,8 +33,8 @@ local function PutTheCatOut(self, event)
 
 	if C_PetJournal.GetSummonedPetGUID() then return end
 
-	Debug("Queueing pet to be put out")
 	self:Show()
+	ns.Debug("Queueing pet to be put out")
 end
 f.PLAYER_REGEN_ENABLED = PutTheCatOut
 f.PLAYER_CONTROL_GAINED = PutTheCatOut
@@ -66,7 +62,7 @@ f:SetScript("OnUpdate", function(self, elap)
 
 	-- 1 in 3 times, we use all pets
 	local use_all = math.random(3) == 1
-	Debug("Summoning random pet", use_all and "all" or "favs")
+	ns.Debug("Summoning random pet", use_all and "all" or "favs")
 	C_PetJournal.SummonRandomPet(use_all)
 
 	self:Hide()
