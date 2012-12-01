@@ -28,12 +28,15 @@ end
 
 
 local function DoIt()
-	if CannotDoIt() then return ns.StartTimer(GetTime() + 10, DoIt) end
+	if CannotDoIt() then return end
+	if C_PetJournal.GetSummonedPetGUID() then return true end
 
 	-- 1 in 3 times, we use all pets
 	local use_all = math.random(3) == 1
 	ns.Debug("Summoning random pet", use_all and "all" or "favs")
 	C_PetJournal.SummonRandomPet(use_all)
+
+	return true
 end
 
 
@@ -52,7 +55,7 @@ local function PutTheCatOut()
 	ns.UnregisterEvent("PLAYER_CONTROL_GAINED")
 
 	ns.Debug("Queueing pet to be put out")
-	ns.StartTimer(GetTime() + 10, DoIt)
+	ns.StartRepeatingTimer(10, DoIt)
 end
 
 
