@@ -13,31 +13,26 @@ local blistzones = {
 }
 
 local f = CreateFrame("Frame")
-f:SetScript("OnEvent", function(self, event, ...)
-	if self[event] then return self[event](self, event, ...) end
-end)
 f:Hide()
 
 
-local function PutTheCatOut(self, event)
-		    InCombatLockdown() and "In combat" or "Not in combat")
-	ns.Debug(event or "nil", HasFullControl() and "In control" or "Not in control",
+local function PutTheCatOut()
+	ns.Debug(HasFullControl() and "In control" or "Not in control",
+		       InCombatLockdown() and "In combat" or "Not in combat")
 
 	if InCombatLockdown() then
-		return self:RegisterEvent("PLAYER_REGEN_ENABLED")
+		return ns.RegisterEvent("PLAYER_REGEN_ENABLED", PutTheCatOut)
 	end
 	if not HasFullControl() then
-		return self:RegisterEvent("PLAYER_CONTROL_GAINED")
+		return ns.RegisterEvent("PLAYER_CONTROL_GAINED", PutTheCatOut)
 	end
-	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	ns.UnregisterEvent("PLAYER_REGEN_ENABLED")
 
 	if C_PetJournal.GetSummonedPetGUID() then return end
 
-	self:Show()
 	ns.Debug("Queueing pet to be put out")
+	f:Show()
 end
-f.PLAYER_REGEN_ENABLED = PutTheCatOut
-f.PLAYER_CONTROL_GAINED = PutTheCatOut
 
 
 local elapsed
@@ -69,33 +64,19 @@ f:SetScript("OnUpdate", function(self, elap)
 end)
 
 
-f:RegisterEvent("ADDON_LOADED")
-function f:ADDON_LOADED(event, addon)
-	if addon == 'Blizzard_PetJournal' then self:JournalLoaded()
+ns.RegisterEvent("ADDON_LOADED", function(event, addon)
+	if addon == 'Blizzard_PetJournal' then ns.makebutt()
 	elseif addon == myname then
 		KennelDBPC = KennelDBPC or {}
 
-		if IsLoggedIn() then PutTheCatOut(f, "PLAYER_LOGIN") else
-			f:RegisterEvent("PLAYER_LOGIN")
-		end
+		if IsLoggedIn() then PutTheCatOut()
+		else ns.RegisterEvent("PLAYER_LOGIN", PutTheCatOut) end
 
-		if IsAddOnLoaded("Blizzard_PetJournal") then self:JournalLoaded() end
+		if IsAddOnLoaded("Blizzard_PetJournal") then ns.makebutt() end
 	end
-end
+end)
 
 
-function f:JournalLoaded()
-	ns.makebutt()
-
-	self:UnregisterEvent("ADDON_LOADED")
-
-	self.ADDON_LOADED = nil
-	self.JournalLoaded = nil
-	ns.makebutt = nil
-end
-
-
-f:RegisterEvent("COMPANION_UPDATE")
-function f:COMPANION_UPDATE(event, comptype)
-	if comptype == "CRITTER" then PutTheCatOut(self, "COMPANION_UPDATE") end
-end
+ns.RegisterEvent("COMPANION_UPDATE", function(event, comptype)
+	if comptype == "CRITTER" then PutTheCatOut() end
+end)

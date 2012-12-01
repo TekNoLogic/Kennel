@@ -42,4 +42,8 @@ function ns.makebutt()
 		GameTooltip:Show()
 	end)
 	butt:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
+	ns.UnregisterEvent("ADDON_LOADED")
+	ns.ADDON_LOADED = nil
+	ns.makebutt = nil
 end

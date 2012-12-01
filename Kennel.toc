@@ -18,6 +18,7 @@
 tekKonfig\tekKonfig.xml
 
 externals\debug.lua
+externals\events.lua
 
 Kennel.lua
 Config.lua
