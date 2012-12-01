@@ -9,11 +9,11 @@
 
 ## OptionalDeps: tekDebug
 
-## SavedVariablesPerCharacter: KennelDBPC
-
 ## LoadManagers: AddonLoader
 ## X-LoadOn-Always: delayed
 ## X-LoadOn-InterfaceOptions: Kennel
+
+## LoadWith: Blizzard_PetJournal
 
 tekKonfig\tekKonfig.xml
 

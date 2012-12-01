@@ -14,7 +14,7 @@ local blistzones = {
 
 
 local function CannotDoIt()
-	if KennelDBPC.disabled then return true end
+	if ns.disabled then return true end
 
 	local _, instanceType = IsInInstance()
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
@@ -59,8 +59,6 @@ end
 ns.RegisterEvent("ADDON_LOADED", function(event, addon)
 	if addon == 'Blizzard_PetJournal' then ns.makebutt()
 	elseif addon == myname then
-		KennelDBPC = KennelDBPC or {}
-
 		if IsLoggedIn() then PutTheCatOut()
 		else ns.RegisterEvent("PLAYER_LOGIN", PutTheCatOut) end
 
