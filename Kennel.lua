@@ -44,32 +44,6 @@ local function GetZonePet()
 end
 
 
-local favs, allpets = {}, {}
-local function GetRandomPet()
-	local _, numpets = C_PetJournal.GetNumPets(false)
-	for i in pairs(favs) do favs[i] = nil end
-	for i in pairs(allpets) do allpets[i] = nil end
-
-	for i=1,numpets do
-		local petID, _, _, customname, _, favorite, _, name, _, _, creatureID =
-			C_PetJournal.GetPetInfoByIndex(i, false)
-
-		if favorite then table.insert(favs, petID) end
-		if not blistpets[creatureID] then table.insert(allpets, petID) end
-	end
-
-	if not next(allpets) then return end
-
-	-- Two out of three times, use a fav
-	local t = next(favs) and math.random(3) ~= 1 and favs or allpets
-	local i = math.random(#t)
-	local petID = t[i]
-	local _, customname, _, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
-
-	return petID, customname or name
-end
-
-
 local function SummonedPet()
 	local petID = C_PetJournal.GetSummonedPetGUID()
 	if not petID then return end
@@ -113,12 +87,17 @@ f:SetScript("OnUpdate", function(self, elap)
 	end
 
 	local petID, name = GetZonePet()
-	if not petID then petID, name = GetRandomPet() end
 	if petID then
 		Debug("Putting out pet", name or 'nil', petID)
 		C_PetJournal.SummonPetByGUID(petID)
-		self:Hide()
+	else
+		-- 1 in 3 times, we use all pets
+		local use_all = math.random(3) == 1
+		Debug("Summoning random pet", use_all and "all" or "favs")
+		C_PetJournal.SummonRandomPet(use_all)
 	end
+
+	self:Hide()
 end)
 
 
