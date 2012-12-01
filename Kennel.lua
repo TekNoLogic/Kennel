@@ -9,16 +9,11 @@ local function Debug(...) if debugf then debugf:AddMessage(string.join(", ", ...
 local SOR, FOOD, DRINK = GetSpellInfo(20711), GetSpellInfo(7737), GetSpellInfo(430)
 
 local DELAY = 2
-local blistzones, blistpets = {
+local blistzones = {
 	["Throne of Kil'jaeden"] = true,
 	["Shallow's End"] = true,
 	["\208\162\209\128\208\190\208\189 \208\154\208\184\208\187'\208\180\208\182\208\181\208\180\208\181\208\189\208\176"] = true, -- ruRU
 	["Tr\195\180ne de Kil'jaeden"] = true, -- frFR
-}, {
-	[92395] = true, -- Guild Page
-	[92396] = true, -- Guild Page
-	[92397] = true, -- Guild Herald
-	[92398] = true, -- Guild Herald
 }
 
 local f = CreateFrame("Frame")
@@ -26,7 +21,6 @@ f:SetScript("OnEvent", function(self, event, ...) if self[event] then return sel
 f:Hide()
 
 
-local numpets = 0
 local function PutTheCatOut(self, event)
 	Debug(event or "nil", HasFullControl() and "In control" or "Not in control", InCombatLockdown() and "In combat" or "Not in combat")
 
@@ -46,7 +40,7 @@ f:SetScript("OnShow", function() elapsed = 0 end)
 f:SetScript("OnUpdate", function(self, elap)
 	if KennelDBPC.disabled then return end
 
-	elapsed  = elapsed + elap
+	elapsed = elapsed + elap
 	if elapsed < DELAY then return end
 
 	local _, instanceType = IsInInstance()
