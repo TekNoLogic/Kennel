@@ -24,4 +24,3 @@ externals\ui-about.lua
 externals\ui-check.lua
 
 Kennel.lua
-Config.lua
