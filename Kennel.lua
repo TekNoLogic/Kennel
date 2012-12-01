@@ -64,17 +64,17 @@ local function GetRandomPet()
 	local t = next(favs) and math.random(3) ~= 1 and favs or allpets
 	local i = math.random(#t)
 	local petID = t[i]
-	local _, customname, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
+	local _, customname, _, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
 
 	return petID, customname or name
 end
 
 
 local function SummonedPet()
-	local petID = C_PetJournal.GetSummonedPetID()
+	local petID = C_PetJournal.GetSummonedPetGUID()
 	if not petID then return end
 
-	local _, customname, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
+	local _, customname, _, _, _, _, _, name = C_PetJournal.GetPetInfoByPetID(petID)
 	return customname or name
 end
 
@@ -116,7 +116,7 @@ f:SetScript("OnUpdate", function(self, elap)
 	if not petID then petID, name = GetRandomPet() end
 	if petID then
 		Debug("Putting out pet", name or 'nil', petID)
-		C_PetJournal.SummonPetByID(petID)
+		C_PetJournal.SummonPetByGUID(petID)
 		self:Hide()
 	end
 end)
