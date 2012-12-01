@@ -15,8 +15,6 @@
 
 ## LoadWith: Blizzard_PetJournal
 
-tekKonfig\tekKonfig.xml
-
 externals\debug.lua
 externals\events.lua
 externals\timer.lua
