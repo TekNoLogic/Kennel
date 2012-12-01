@@ -98,32 +98,8 @@ f.ZONE_CHANGED_INDOORS = PutTheCatOut
 f.ZONE_CHANGED_NEW_AREA = PutTheCatOut
 
 
-local function IsMounted()
-	for i=1,GetNumCompanions("MOUNT") do
-		local _, _, _, _, mounted = GetCompanionInfo("MOUNT", i)
-		if mounted then return true end
-	end
-end
-
-
-local wasmounted
 function f:COMPANION_UPDATE(event, comptype)
-
-	if comptype == "CRITTER" then
-		return PutTheCatOut(self, "COMPANION_UPDATE")
-	end
-
-	if comptype == "MOUNT" then
-		local mounted = IsMounted()
-
-		if KennelDBPC.dismissonmount and mounted and not wasmounted then
-			DismissCompanion("CRITTER")
-		end
-
-		wasmounted = mounted
-
-		return
-	end
+	if comptype == "CRITTER" then PutTheCatOut(self, "COMPANION_UPDATE") end
 end
 
 f:RegisterEvent("COMPANION_UPDATE")

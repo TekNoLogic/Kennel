@@ -20,10 +20,6 @@ frame:SetScript("OnShow", function(frame)
 	local checksound = enabled:GetScript("OnClick")
 	enabled:SetScript("OnClick", function(self) checksound(self); KennelDBPC.disabled = not KennelDBPC.disabled end)
 	enabled:SetChecked(not KennelDBPC.disabled)
-
-	local mountdismiss = LibStub("tekKonfig-Checkbox").new(frame, nil, "Dismiss when mounted", "TOPLEFT", enabled, "BOTTOMLEFT", 0, -4)
-	mountdismiss:SetScript("OnClick", function(self) checksound(self); KennelDBPC.dismissonmount = not KennelDBPC.dismissonmount end)
-	mountdismiss:SetChecked(KennelDBPC.dismissonmount)
 end)
 
 
