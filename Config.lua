@@ -2,10 +2,9 @@
 local myname, ns = ...
 
 
-local NUMROWS, NUMCOLS, ICONSIZE, GAP, EDGEGAP = 8, 4, 32, 8, 16
-local rows = {}
-
-if AddonLoader and AddonLoader.RemoveInterfaceOptions then AddonLoader:RemoveInterfaceOptions("Kennel") end
+if AddonLoader and AddonLoader.RemoveInterfaceOptions then
+	AddonLoader:RemoveInterfaceOptions("Kennel")
+end
 
 local frame = CreateFrame("Frame", nil, InterfaceOptionsFramePanelContainer)
 frame.name = "Kennel"
@@ -13,12 +12,14 @@ frame:Hide()
 frame:SetScript("OnShow", function(frame)
 	local tektab = LibStub("tekKonfig-TopTab")
 
-	local title, subtitle = LibStub("tekKonfig-Heading").new(frame, "Kennel", "This panel allows you to select which pets Kennel will put out.")
+	local title, subtitle = LibStub("tekKonfig-Heading").new(frame, "Kennel", "Put the cat out.")
 
 
-	local enabled = LibStub("tekKonfig-Checkbox").new(frame, nil, "Enabled", "TOPLEFT", subtitle, "BOTTOMLEFT", -2, -GAP)
+	local enabled = LibStub("tekKonfig-Checkbox").new(frame, nil, "Enabled", "TOPLEFT", subtitle, "BOTTOMLEFT", -2, -8)
 	local checksound = enabled:GetScript("OnClick")
-	enabled:SetScript("OnClick", function(self) checksound(self); KennelDBPC.disabled = not KennelDBPC.disabled end)
+	enabled:SetScript("OnClick", function(self)
+		checksound(self); KennelDBPC.disabled = not KennelDBPC.disabled
+	end)
 	enabled:SetChecked(not KennelDBPC.disabled)
 end)
 

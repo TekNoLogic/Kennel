@@ -17,15 +17,22 @@ local blistzones = {
 }
 
 local f = CreateFrame("Frame")
-f:SetScript("OnEvent", function(self, event, ...) if self[event] then return self[event](self, event, ...) end end)
+f:SetScript("OnEvent", function(self, event, ...)
+	if self[event] then return self[event](self, event, ...) end
+end)
 f:Hide()
 
 
 local function PutTheCatOut(self, event)
-	Debug(event or "nil", HasFullControl() and "In control" or "Not in control", InCombatLockdown() and "In combat" or "Not in combat")
+	Debug(event or "nil", HasFullControl() and "In control" or "Not in control",
+		    InCombatLockdown() and "In combat" or "Not in combat")
 
-	if InCombatLockdown() then return self:RegisterEvent("PLAYER_REGEN_ENABLED") end
-	if not HasFullControl() then return self:RegisterEvent("PLAYER_CONTROL_GAINED") end
+	if InCombatLockdown() then
+		return self:RegisterEvent("PLAYER_REGEN_ENABLED")
+	end
+	if not HasFullControl() then
+		return self:RegisterEvent("PLAYER_CONTROL_GAINED")
+	end
 	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
 
 	if C_PetJournal.GetSummonedPetGUID() then return end
@@ -33,6 +40,8 @@ local function PutTheCatOut(self, event)
 	Debug("Queueing pet to be put out")
 	self:Show()
 end
+f.PLAYER_REGEN_ENABLED = PutTheCatOut
+f.PLAYER_CONTROL_GAINED = PutTheCatOut
 
 
 local elapsed
@@ -46,8 +55,11 @@ f:SetScript("OnUpdate", function(self, elap)
 	local _, instanceType = IsInInstance()
 	local pvpink = instanceType == "pvp" or instanceType == "arena"
 
-	if pvpink or InCombatLockdown() or IsStealthed() or IsMounted() or IsFlying() or IsFalling() or UnitCastingInfo("player") or UnitChannelInfo("player") or blistzones[GetSubZoneText()]
-		or UnitBuff("player", SOR) or UnitBuff("player", FOOD) or UnitBuff("player", DRINK) then
+	if pvpink or InCombatLockdown() or IsStealthed() or IsMounted() or IsFlying()
+		or IsFalling() or UnitCastingInfo("player") or UnitChannelInfo("player")
+		or blistzones[GetSubZoneText()] or UnitBuff("player", SOR)
+		or UnitBuff("player", FOOD) or UnitBuff("player", DRINK) then
+
 		elapsed = 0
 		return
 	end
@@ -62,8 +74,6 @@ end)
 
 
 f:RegisterEvent("ADDON_LOADED")
-
-
 function f:ADDON_LOADED(event, addon)
 	if addon == 'Blizzard_PetJournal' then self:JournalLoaded()
 	elseif addon == myname then
@@ -89,21 +99,7 @@ function f:JournalLoaded()
 end
 
 
-f.PLAYER_REGEN_ENABLED = PutTheCatOut
-f.PLAYER_CONTROL_GAINED = PutTheCatOut
-f.PLAYER_LOGIN = PutTheCatOut
-f.PLAYER_UNGHOST = PutTheCatOut
-f.ZONE_CHANGED = PutTheCatOut
-f.ZONE_CHANGED_INDOORS = PutTheCatOut
-f.ZONE_CHANGED_NEW_AREA = PutTheCatOut
-
-
+f:RegisterEvent("COMPANION_UPDATE")
 function f:COMPANION_UPDATE(event, comptype)
 	if comptype == "CRITTER" then PutTheCatOut(self, "COMPANION_UPDATE") end
 end
-
-f:RegisterEvent("COMPANION_UPDATE")
-f:RegisterEvent("PLAYER_UNGHOST")
-f:RegisterEvent("ZONE_CHANGED")
-f:RegisterEvent("ZONE_CHANGED_INDOORS")
-f:RegisterEvent("ZONE_CHANGED_NEW_AREA")
