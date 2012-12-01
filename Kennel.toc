@@ -4,9 +4,7 @@
 ## Notes: Random pet summoner
 ## Author: Tekkub Stoutwrithe
 ## Version: Alpha
-## X-Website: http://www.tekkub.net/
-## X-Email: tekkub-wow@googlegroups.com
-## X-Category: Inventory
+## X-Website: http://tekkub.net/
 ## X-Icon: Interface\Icons\INV_Box_PetCarrier_01
 
 ## OptionalDeps: tekDebug
