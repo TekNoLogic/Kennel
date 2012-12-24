@@ -1,5 +1,0 @@
-debug.lua
-events.lua
-timer.lua
-ui-about.lua
-ui-check.lua

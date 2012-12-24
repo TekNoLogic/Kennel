@@ -3,7 +3,7 @@
 ## Title: Kennel
 ## Notes: Random pet summoner
 ## Author: Tekkub Stoutwrithe
-## Version: Alpha
+## Version: 5.1.0.16
 ## X-Website: http://tekkub.net/
 ## X-Icon: Interface\Icons\INV_Box_PetCarrier_01
 
