@@ -1,3 +1,8 @@
+5.1.0.16-Beta
+    Fixes for 5.1
+    Addon is now much *much* simpler thanks to new macros
+    Favorite pets are used more often than others
+
 5.0.1.15-Beta
     Some fixes for 5.0
 
